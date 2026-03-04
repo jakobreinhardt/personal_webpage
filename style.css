@@ -862,43 +862,135 @@ img {
     color: var(--color-investor);
 }
 
-/* ===== Other (Investor) ===== */
-.other-grid {
+/* ===== Portfolio (Investor) ===== */
+.portfolio-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 20px;
+    max-width: 800px;
+    margin-inline: auto;
 }
 
-.other-card {
+.portfolio-card {
+    display: flex;
+    align-items: center;
+    gap: 28px;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius);
-    padding: 28px;
-    text-align: center;
+    padding: 32px;
+    text-decoration: none;
+    color: inherit;
     transition: border-color var(--transition), transform var(--transition);
 }
 
-.other-card:hover {
+.portfolio-card:hover {
     border-color: var(--color-investor);
-    transform: translateY(-4px);
+    transform: translateY(-3px);
 }
 
-.other-icon {
-    font-size: 2rem;
-    display: block;
-    margin-bottom: 12px;
+.portfolio-logo {
+    flex-shrink: 0;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 12px;
 }
 
-.other-card h3 {
-    font-size: 1.05rem;
+.portfolio-logo img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.portfolio-logo-fallback {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    letter-spacing: 2px;
+}
+
+.portfolio-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.portfolio-info h3 {
+    font-size: 1.15rem;
     color: var(--color-text-heading);
     margin-bottom: 8px;
 }
 
-.other-card p {
-    font-size: 0.9rem;
+.portfolio-desc {
+    font-size: 0.92rem;
     color: var(--color-text-muted);
     line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.portfolio-tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-investor);
+    background: rgba(167, 139, 250, 0.1);
+    border: 1px solid rgba(167, 139, 250, 0.25);
+    border-radius: 20px;
+    padding: 3px 12px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+}
+
+.portfolio-arrow {
+    flex-shrink: 0;
+    font-size: 1.5rem;
+    color: var(--color-text-muted);
+    transition: color var(--transition), transform var(--transition);
+}
+
+.portfolio-card:hover .portfolio-arrow {
+    color: var(--color-investor);
+    transform: translateX(4px);
+}
+
+@media (max-width: 600px) {
+    .portfolio-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 16px;
+    }
+    .portfolio-arrow {
+        display: none;
+    }
+}
+
+/* ===== What I Bring (Investor) ===== */
+.bring-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 720px;
+    margin-inline: auto;
+}
+
+.bring-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.bring-item:last-child {
+    border-bottom: none;
+}
+
+.bring-item strong {
+    color: var(--color-text-heading);
+    font-weight: 600;
 }
 
 /* ===== Activity Feature ===== */
