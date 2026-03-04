@@ -490,9 +490,9 @@ img {
 }
 
 .highlight-icon {
-    font-size: 1.8rem;
     display: block;
     margin-bottom: 8px;
+    color: var(--color-primary);
 }
 
 .highlight-card h3 {
@@ -812,9 +812,9 @@ img {
 }
 
 .investment-icon {
-    font-size: 2.2rem;
     display: block;
     margin-bottom: 12px;
+    color: var(--color-investor);
 }
 
 .investment-card h3 {
