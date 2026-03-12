@@ -12,11 +12,17 @@
 </head>
 <body class="entry-page">
 
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="theme-toggle" aria-label="Toggle clean theme" title="Switch design">
+        <svg class="theme-toggle-icon icon-clean" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg class="theme-toggle-icon icon-dark" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+
     <!-- Entry Hero -->
     <section class="entry-hero">
         <div class="entry-hero-content">
             <p class="entry-greeting">Hello, I'm</p>
-            <h1 class="entry-name">Jakob Reinhardt<span class="entry-suffix">, Dr.-Ing.</span></h1>
+            <h1 class="entry-name">Jakob Reinhardt</h1>
             <p class="entry-tagline">Researcher &middot; Investor &middot; Mountain Enthusiast</p>
         </div>
     </section>
@@ -24,6 +30,9 @@
     <!-- Three Spheres -->
     <section class="spheres">
         <a href="researcher.html" class="sphere sphere-researcher">
+            <div class="sphere-image">
+                <img src="https://images.unsplash.com/photo-1581093458791-9d42e3c2fd45?w=800&h=500&fit=crop" alt="Research laboratory">
+            </div>
             <div class="sphere-icon">
                 <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path d="M12 20.055V14"/></svg>
             </div>
@@ -32,6 +41,9 @@
             <span class="sphere-arrow">&rarr;</span>
         </a>
         <a href="investor.html" class="sphere sphere-investor">
+            <div class="sphere-image">
+                <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&h=500&fit=crop" alt="Investment analytics">
+            </div>
             <div class="sphere-icon">
                 <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 20h20"/><path d="M5 20V10l4-4 4 4 7-7"/><path d="M16 3h4v4"/></svg>
             </div>
@@ -40,6 +52,9 @@
             <span class="sphere-arrow">&rarr;</span>
         </a>
         <a href="activities.html" class="sphere sphere-activities">
+            <div class="sphere-image">
+                <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&h=500&fit=crop" alt="Mountain landscape">
+            </div>
             <div class="sphere-icon">
                 <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2L4 14h6l-2 8 10-12h-6l2-8z"/></svg>
             </div>
@@ -52,9 +67,10 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2026 Jakob Reinhardt. All rights reserved.</p>
+            <p>&copy; 2026 Dr. Jakob Reinhardt. All rights reserved.</p>
         </div>
     </footer>
 
+    <script src="script.js"></script>
 </body>
 </html>

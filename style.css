@@ -1266,3 +1266,455 @@ img {
     opacity: 1;
     transform: translateY(0);
 }
+
+/* ===== Theme Toggle Button ===== */
+.theme-toggle {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 9999;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg-alt);
+    color: var(--color-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.theme-toggle:hover {
+    transform: scale(1.1);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+.icon-dark { display: none; }
+.icon-clean { display: block; }
+
+/* ===== Sphere Images (hidden by default, shown in clean theme) ===== */
+.sphere-image {
+    display: none;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 8px 8px 0 0;
+    margin: -48px -32px 24px -32px;
+    width: calc(100% + 64px);
+}
+
+.sphere-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.sphere:hover .sphere-image img {
+    transform: scale(1.05);
+}
+
+/* =============================================================
+   CLEAN THEME — Light minimal design inspired by Boston Venture
+   ============================================================= */
+body.clean-theme {
+    --color-bg: #ffffff;
+    --color-bg-alt: #f8f9fa;
+    --color-surface: #f1f3f5;
+    --color-primary: #1a1a2e;
+    --color-primary-dark: #0d0d1a;
+    --color-accent: #2d2d44;
+    --color-text: #333333;
+    --color-text-muted: #6c757d;
+    --color-text-heading: #1a1a2e;
+    --color-border: #e0e0e0;
+    --color-researcher: #1a73e8;
+    --color-investor: #6d28d9;
+    --color-activities: #059669;
+}
+
+/* Toggle icon swap */
+body.clean-theme .icon-clean { display: none; }
+body.clean-theme .icon-dark { display: block; }
+
+body.clean-theme .theme-toggle {
+    background: #ffffff;
+    border-color: #d0d0d0;
+    color: #333;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+body.clean-theme .theme-toggle:hover {
+    border-color: #1a1a2e;
+    color: #1a1a2e;
+}
+
+/* --- Entry Page --- */
+body.clean-theme.entry-page {
+    background: #ffffff;
+}
+
+body.clean-theme .entry-hero::before {
+    background: radial-gradient(circle, rgba(26, 26, 46, 0.03) 0%, transparent 60%);
+}
+
+body.clean-theme .entry-greeting {
+    color: #6c757d;
+    font-weight: 400;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+}
+
+body.clean-theme .entry-name {
+    color: #1a1a2e;
+    font-weight: 300;
+    font-size: 3.8rem;
+    letter-spacing: -1px;
+}
+
+body.clean-theme .entry-suffix {
+    color: #999;
+    font-weight: 300;
+}
+
+body.clean-theme .entry-tagline {
+    color: #999;
+    font-weight: 300;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+/* --- Spheres in clean theme: show image, hide icon --- */
+body.clean-theme .sphere-image {
+    display: block;
+}
+
+body.clean-theme .sphere-icon {
+    display: none;
+}
+
+body.clean-theme .sphere {
+    border: none;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.06);
+    padding: 0;
+    overflow: hidden;
+    text-align: left;
+}
+
+body.clean-theme .sphere-image {
+    margin: 0;
+    width: 100%;
+    height: 220px;
+    border-radius: 0;
+}
+
+body.clean-theme .sphere h2,
+body.clean-theme .sphere p,
+body.clean-theme .sphere-arrow {
+    padding-left: 28px;
+    padding-right: 28px;
+}
+
+body.clean-theme .sphere h2 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-top: 24px;
+    margin-bottom: 8px;
+}
+
+body.clean-theme .sphere p {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 20px;
+}
+
+body.clean-theme .sphere-arrow {
+    padding-bottom: 28px;
+    color: #bbb;
+}
+
+body.clean-theme .sphere::before {
+    display: none;
+}
+
+body.clean-theme .sphere:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    border-color: transparent;
+}
+
+body.clean-theme .sphere-researcher:hover { border-color: transparent; }
+body.clean-theme .sphere-investor:hover { border-color: transparent; }
+body.clean-theme .sphere-activities:hover { border-color: transparent; }
+
+body.clean-theme .sphere:hover .sphere-arrow { color: #1a1a2e; }
+
+/* --- Navbar --- */
+body.clean-theme .navbar {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid #eee;
+}
+
+body.clean-theme .nav-logo {
+    color: #1a1a2e;
+    font-weight: 700;
+}
+
+body.clean-theme .nav-logo:hover {
+    color: #444;
+}
+
+body.clean-theme .nav-links a {
+    color: #888;
+}
+
+body.clean-theme .nav-links a:hover {
+    color: #1a1a2e;
+}
+
+body.clean-theme .nav-links a::after {
+    background: #1a1a2e;
+}
+
+body.clean-theme .nav-divider {
+    background: #ddd;
+}
+
+body.clean-theme .nav-toggle span {
+    background: #1a1a2e;
+}
+
+/* --- Sub Hero --- */
+body.clean-theme .sub-hero {
+    padding-top: 140px;
+}
+
+body.clean-theme .sub-hero::before {
+    background: none;
+}
+
+body.clean-theme .back-link {
+    color: #999;
+}
+
+body.clean-theme .back-link:hover {
+    color: #1a1a2e;
+}
+
+body.clean-theme .sub-hero-label {
+    color: #999;
+    font-weight: 500;
+    letter-spacing: 3px;
+}
+
+body.clean-theme .sub-hero h1 {
+    font-weight: 300;
+    font-size: 3rem;
+    color: #1a1a2e;
+    letter-spacing: -0.5px;
+}
+
+body.clean-theme .sub-hero p {
+    color: #888;
+    font-weight: 300;
+}
+
+/* --- Sections --- */
+body.clean-theme .section-alt {
+    background: #f8f9fa;
+}
+
+body.clean-theme .section-title {
+    font-weight: 300;
+    font-size: 2.2rem;
+    color: #1a1a2e;
+    letter-spacing: -0.5px;
+}
+
+body.clean-theme .section-title::after {
+    background: #1a1a2e;
+    height: 2px;
+    width: 40px;
+}
+
+body.clean-theme.subpage-researcher .section-title::after,
+body.clean-theme.subpage-investor .section-title::after,
+body.clean-theme.subpage-activities .section-title::after {
+    background: #1a1a2e;
+}
+
+body.clean-theme .section-intro {
+    color: #888;
+    font-weight: 300;
+}
+
+/* --- Cards --- */
+body.clean-theme .highlight-card,
+body.clean-theme .skill-category,
+body.clean-theme .education-card,
+body.clean-theme .engagement-card,
+body.clean-theme .investment-card,
+body.clean-theme .sport-card,
+body.clean-theme .activity-feature {
+    background: #ffffff;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+
+body.clean-theme .highlight-card:hover,
+body.clean-theme .skill-category:hover,
+body.clean-theme .education-card:hover,
+body.clean-theme .engagement-card:hover,
+body.clean-theme .investment-card:hover,
+body.clean-theme .sport-card:hover,
+body.clean-theme .activity-feature:hover {
+    border-color: #ccc;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+/* --- Timeline --- */
+body.clean-theme .timeline::before {
+    background: linear-gradient(to bottom, #ddd, #eee, transparent);
+}
+
+body.clean-theme .timeline-marker {
+    background: #fff;
+    border-color: #1a1a2e;
+}
+
+body.clean-theme .timeline-content {
+    background: #ffffff;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+
+body.clean-theme .timeline-content:hover {
+    border-color: #ccc;
+}
+
+body.clean-theme .timeline-date {
+    color: #999;
+}
+
+body.clean-theme .timeline-content li::before {
+    color: #1a1a2e;
+}
+
+/* --- Publications --- */
+body.clean-theme .publication-item {
+    background: #ffffff;
+    border: 1px solid #eee;
+}
+
+body.clean-theme .publication-item:hover {
+    border-color: #ccc;
+}
+
+body.clean-theme .pub-year {
+    color: #999;
+}
+
+/* --- Portfolio --- */
+body.clean-theme .portfolio-card {
+    background: #ffffff;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.04);
+}
+
+body.clean-theme .portfolio-card:hover {
+    border-color: #ccc;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+body.clean-theme .portfolio-tag {
+    color: #666;
+    background: #f0f0f0;
+    border-color: #ddd;
+}
+
+/* --- Skill Tags --- */
+body.clean-theme .skill-tag {
+    background: #f0f0f0;
+    color: #555;
+    border-color: #ddd;
+}
+
+body.clean-theme .skill-tag:hover {
+    background: #e8e8e8;
+    border-color: #ccc;
+}
+
+/* --- Buttons --- */
+body.clean-theme .btn-primary {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+body.clean-theme .btn-primary:hover {
+    background: #2d2d44;
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(26,26,46,0.2);
+}
+
+body.clean-theme .btn-secondary {
+    color: #1a1a2e;
+    border-color: #1a1a2e;
+}
+
+body.clean-theme .btn-secondary:hover {
+    background: rgba(26,26,46,0.05);
+    color: #1a1a2e;
+}
+
+/* --- Contact --- */
+body.clean-theme .contact-link {
+    border-color: #eee;
+    color: #333;
+}
+
+body.clean-theme .contact-link:hover {
+    border-color: #1a1a2e;
+    background: rgba(26,26,46,0.02);
+    color: #1a1a2e;
+}
+
+/* --- Footer --- */
+body.clean-theme .footer {
+    border-top: 1px solid #eee;
+    color: #999;
+}
+
+/* --- Bring List --- */
+body.clean-theme .bring-item {
+    border-bottom-color: #eee;
+}
+
+/* --- Activity --- */
+body.clean-theme .activity-date {
+    color: #999;
+}
+
+body.clean-theme .activity-list li::before {
+    color: #1a1a2e;
+}
+
+/* --- Mobile menu --- */
+@media (max-width: 768px) {
+    body.clean-theme .nav-links {
+        background: rgba(255, 255, 255, 0.98);
+        border-bottom: 1px solid #eee;
+    }
+
+    body.clean-theme .sphere-image {
+        height: 180px;
+    }
+}

@@ -1,3 +1,20 @@
+// ===== Theme Toggle =====
+(function() {
+    // Apply saved theme immediately to prevent flash
+    if (localStorage.getItem('theme') === 'clean') {
+        document.body.classList.add('clean-theme');
+    }
+
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            document.body.classList.toggle('clean-theme');
+            const isClean = document.body.classList.contains('clean-theme');
+            localStorage.setItem('theme', isClean ? 'clean' : 'dark');
+        });
+    }
+})();
+
 // Mobile nav toggle (only on subpages with navbar)
 const navToggle = document.getElementById('nav-toggle');
 const navLinks = document.getElementById('nav-links');
@@ -43,10 +60,11 @@ document.querySelectorAll(
 const navbar = document.getElementById('navbar');
 if (navbar) {
     window.addEventListener('scroll', () => {
+        const isClean = document.body.classList.contains('clean-theme');
         if (window.scrollY > 50) {
-            navbar.style.background = 'rgba(15, 23, 42, 0.95)';
+            navbar.style.background = isClean ? 'rgba(255, 255, 255, 0.97)' : 'rgba(15, 23, 42, 0.95)';
         } else {
-            navbar.style.background = 'rgba(15, 23, 42, 0.85)';
+            navbar.style.background = isClean ? 'rgba(255, 255, 255, 0.92)' : 'rgba(15, 23, 42, 0.85)';
         }
     });
 }
