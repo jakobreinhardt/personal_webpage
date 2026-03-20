@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg-r" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f1729"/>
+      <stop offset="100%" style="stop-color:#1a2744"/>
+    </linearGradient>
+    <linearGradient id="glow-r" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#4fc3f7;stop-opacity:0.6"/>
+      <stop offset="100%" style="stop-color:#4fc3f7;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="blur-r">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+    <filter id="glow-filter-r">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bg-r)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.07" stroke="#4fc3f7" stroke-width="0.5">
+    <line x1="0" y1="100" x2="800" y2="100"/><line x1="0" y1="200" x2="800" y2="200"/>
+    <line x1="0" y1="300" x2="800" y2="300"/><line x1="0" y1="400" x2="800" y2="400"/>
+    <line x1="160" y1="0" x2="160" y2="500"/><line x1="320" y1="0" x2="320" y2="500"/>
+    <line x1="480" y1="0" x2="480" y2="500"/><line x1="640" y1="0" x2="640" y2="500"/>
+  </g>
+
+  <!-- DNA Helix Left -->
+  <g filter="url(#glow-filter-r)" opacity="0.5">
+    <path d="M120,50 Q140,100 120,150 Q100,200 120,250 Q140,300 120,350 Q100,400 120,450" 
+          fill="none" stroke="#4fc3f7" stroke-width="2"/>
+    <path d="M160,50 Q140,100 160,150 Q180,200 160,250 Q140,300 160,350 Q180,400 160,450" 
+          fill="none" stroke="#81d4fa" stroke-width="2"/>
+    <!-- Rungs -->
+    <line x1="120" y1="100" x2="160" y2="100" stroke="#4fc3f7" stroke-width="1.5" opacity="0.6"/>
+    <line x1="120" y1="150" x2="160" y2="150" stroke="#4fc3f7" stroke-width="1.5" opacity="0.6"/>
+    <line x1="120" y1="200" x2="160" y2="200" stroke="#4fc3f7" stroke-width="1.5" opacity="0.6"/>
+    <line x1="120" y1="250" x2="160" y2="250" stroke="#4fc3f7" stroke-width="1.5" opacity="0.6"/>
+    <line x1="120" y1="300" x2="160" y2="300" stroke="#4fc3f7" stroke-width="1.5" opacity="0.6"/>
+    <line x1="120" y1="350" x2="160" y2="350" stroke="#4fc3f7" stroke-width="1.5" opacity="0.6"/>
+    <line x1="120" y1="400" x2="160" y2="400" stroke="#4fc3f7" stroke-width="1.5" opacity="0.6"/>
+  </g>
+
+  <!-- Central molecular network -->
+  <g filter="url(#glow-filter-r)">
+    <!-- Nodes -->
+    <circle cx="400" cy="220" r="8" fill="#4fc3f7" opacity="0.9"/>
+    <circle cx="340" cy="280" r="6" fill="#81d4fa" opacity="0.8"/>
+    <circle cx="460" cy="280" r="6" fill="#81d4fa" opacity="0.8"/>
+    <circle cx="320" cy="180" r="5" fill="#b3e5fc" opacity="0.7"/>
+    <circle cx="480" cy="180" r="5" fill="#b3e5fc" opacity="0.7"/>
+    <circle cx="400" cy="340" r="5" fill="#b3e5fc" opacity="0.7"/>
+    <circle cx="280" cy="240" r="4" fill="#e1f5fe" opacity="0.6"/>
+    <circle cx="520" cy="240" r="4" fill="#e1f5fe" opacity="0.6"/>
+    <circle cx="360" cy="150" r="4" fill="#e1f5fe" opacity="0.5"/>
+    <circle cx="440" cy="150" r="4" fill="#e1f5fe" opacity="0.5"/>
+    <circle cx="300" cy="320" r="3" fill="#e1f5fe" opacity="0.5"/>
+    <circle cx="500" cy="320" r="3" fill="#e1f5fe" opacity="0.5"/>
+    
+    <!-- Connections -->
+    <line x1="400" y1="220" x2="340" y2="280" stroke="#4fc3f7" stroke-width="1.5" opacity="0.5"/>
+    <line x1="400" y1="220" x2="460" y2="280" stroke="#4fc3f7" stroke-width="1.5" opacity="0.5"/>
+    <line x1="400" y1="220" x2="320" y2="180" stroke="#4fc3f7" stroke-width="1" opacity="0.4"/>
+    <line x1="400" y1="220" x2="480" y2="180" stroke="#4fc3f7" stroke-width="1" opacity="0.4"/>
+    <line x1="340" y1="280" x2="400" y2="340" stroke="#81d4fa" stroke-width="1" opacity="0.4"/>
+    <line x1="460" y1="280" x2="400" y2="340" stroke="#81d4fa" stroke-width="1" opacity="0.4"/>
+    <line x1="320" y1="180" x2="280" y2="240" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+    <line x1="480" y1="180" x2="520" y2="240" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+    <line x1="320" y1="180" x2="360" y2="150" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+    <line x1="480" y1="180" x2="440" y2="150" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+    <line x1="340" y1="280" x2="300" y2="320" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+    <line x1="460" y1="280" x2="500" y2="320" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+    <line x1="280" y1="240" x2="340" y2="280" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+    <line x1="520" y1="240" x2="460" y2="280" stroke="#b3e5fc" stroke-width="0.8" opacity="0.3"/>
+  </g>
+
+  <!-- Floating data particles -->
+  <g opacity="0.4">
+    <circle cx="220" cy="120" r="2" fill="#4fc3f7"/><circle cx="580" cy="380" r="2" fill="#4fc3f7"/>
+    <circle cx="650" cy="130" r="1.5" fill="#81d4fa"/><circle cx="250" cy="400" r="1.5" fill="#81d4fa"/>
+    <circle cx="700" cy="250" r="2" fill="#b3e5fc"/><circle cx="80" cy="300" r="2" fill="#b3e5fc"/>
+    <circle cx="550" cy="90" r="1" fill="#e1f5fe"/><circle cx="350" cy="430" r="1" fill="#e1f5fe"/>
+    <circle cx="190" cy="360" r="1.5" fill="#4fc3f7"/><circle cx="620" cy="200" r="1.5" fill="#4fc3f7"/>
+    <circle cx="730" cy="400" r="1" fill="#81d4fa"/><circle cx="50" cy="150" r="1" fill="#81d4fa"/>
+  </g>
+
+  <!-- Robotic arm silhouette (right side) -->
+  <g opacity="0.25" stroke="#4fc3f7" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M620,420 L650,350 L690,300 L720,260 L700,230"/>
+    <circle cx="620" cy="420" r="6" fill="#4fc3f7" opacity="0.3"/>
+    <circle cx="650" cy="350" r="4" fill="#4fc3f7" opacity="0.3"/>
+    <circle cx="690" cy="300" r="4" fill="#4fc3f7" opacity="0.3"/>
+    <circle cx="720" cy="260" r="4" fill="#4fc3f7" opacity="0.3"/>
+    <!-- Gripper -->
+    <line x1="700" y1="230" x2="690" y2="210" stroke-width="2"/>
+    <line x1="700" y1="230" x2="710" y2="210" stroke-width="2"/>
+  </g>
+
+  <!-- Waveform / data visualization bottom -->
+  <g opacity="0.15" stroke="#4fc3f7" stroke-width="1.5" fill="none">
+    <path d="M0,460 Q50,440 100,460 Q150,480 200,455 Q250,430 300,460 Q350,490 400,450 Q450,410 500,460 Q550,490 600,455 Q650,420 700,460 Q750,480 800,450"/>
+    <path d="M0,475 Q50,460 100,475 Q150,490 200,470 Q250,450 300,475 Q350,500 400,465 Q450,430 500,475 Q550,500 600,470 Q650,440 700,475 Q750,490 800,465" opacity="0.5"/>
+  </g>
+
+  <!-- Subtle radial glow center -->
+  <circle cx="400" cy="240" r="150" fill="#4fc3f7" opacity="0.03"/>
+  <circle cx="400" cy="240" r="80" fill="#4fc3f7" opacity="0.05"/>
+</svg>

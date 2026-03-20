@@ -1,0 +1,135 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="40%" style="stop-color:#16213e"/>
+      <stop offset="100%" style="stop-color:#0f3460"/>
+    </linearGradient>
+    <linearGradient id="mt1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0e0e0"/>
+      <stop offset="40%" style="stop-color:#546e7a"/>
+      <stop offset="100%" style="stop-color:#263238"/>
+    </linearGradient>
+    <linearGradient id="mt2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#90a4ae"/>
+      <stop offset="100%" style="stop-color:#1a2530"/>
+    </linearGradient>
+    <linearGradient id="mt3" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#455a64"/>
+      <stop offset="100%" style="stop-color:#111820"/>
+    </linearGradient>
+    <filter id="glow-a">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <radialGradient id="aurora1" cx="30%" cy="20%" r="50%">
+      <stop offset="0%" style="stop-color:#64ffda;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#64ffda;stop-opacity:0"/>
+    </radialGradient>
+    <radialGradient id="aurora2" cx="70%" cy="15%" r="40%">
+      <stop offset="0%" style="stop-color:#b388ff;stop-opacity:0.1"/>
+      <stop offset="100%" style="stop-color:#b388ff;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Sky background -->
+  <rect width="800" height="500" fill="url(#sky)"/>
+
+  <!-- Aurora / atmospheric glow -->
+  <ellipse cx="240" cy="100" rx="300" ry="120" fill="url(#aurora1)"/>
+  <ellipse cx="560" cy="80" rx="250" ry="100" fill="url(#aurora2)"/>
+
+  <!-- Stars -->
+  <g fill="#ffffff">
+    <circle cx="80" cy="40" r="1.2" opacity="0.8"/><circle cx="150" cy="70" r="0.8" opacity="0.6"/>
+    <circle cx="250" cy="30" r="1" opacity="0.7"/><circle cx="350" cy="55" r="0.8" opacity="0.5"/>
+    <circle cx="420" cy="25" r="1.3" opacity="0.9"/><circle cx="500" cy="60" r="0.7" opacity="0.6"/>
+    <circle cx="580" cy="35" r="1" opacity="0.7"/><circle cx="680" cy="50" r="0.9" opacity="0.8"/>
+    <circle cx="720" cy="20" r="1.1" opacity="0.6"/><circle cx="760" cy="70" r="0.8" opacity="0.5"/>
+    <circle cx="40" cy="90" r="0.7" opacity="0.5"/><circle cx="200" cy="95" r="0.6" opacity="0.4"/>
+    <circle cx="450" cy="85" r="0.9" opacity="0.6"/><circle cx="620" cy="95" r="0.7" opacity="0.5"/>
+    <circle cx="300" cy="15" r="0.6" opacity="0.4"/><circle cx="550" cy="10" r="0.8" opacity="0.5"/>
+  </g>
+
+  <!-- Far mountain range (background) -->
+  <polygon points="0,350 60,280 130,310 200,240 260,290 340,200 400,260 470,220 540,270 600,190 660,250 730,210 800,280 800,500 0,500"
+           fill="url(#mt3)" opacity="0.6"/>
+
+  <!-- Mid mountain range -->
+  <polygon points="0,400 80,320 140,350 220,270 300,320 380,250 430,290 500,230 570,280 620,240 700,300 760,260 800,310 800,500 0,500"
+           fill="url(#mt2)" opacity="0.8"/>
+
+  <!-- Snow caps on mid mountains -->
+  <g fill="#e0e0e0" opacity="0.6">
+    <polygon points="220,270 235,285 205,285"/>
+    <polygon points="380,250 398,268 362,268"/>
+    <polygon points="500,230 518,250 482,250"/>
+    <polygon points="620,240 636,258 604,258"/>
+  </g>
+
+  <!-- Main mountain (foreground, central) -->
+  <polygon points="200,500 400,160 600,500" fill="url(#mt1)"/>
+
+  <!-- Snow on main peak -->
+  <polygon points="400,160 420,195 440,185 445,210 430,220 415,205 400,215 385,205 370,220 355,210 360,185 380,195" fill="#eceff1" opacity="0.9"/>
+  <!-- Snow streaks -->
+  <g fill="#cfd8dc" opacity="0.3">
+    <polygon points="390,215 395,260 385,260"/>
+    <polygon points="410,210 418,270 405,270"/>
+    <polygon points="375,225 380,280 370,280"/>
+    <polygon points="425,220 432,290 420,290"/>
+  </g>
+
+  <!-- Foreground ridge (dark) -->
+  <polygon points="0,430 100,380 180,420 260,390 350,410 450,380 520,420 600,395 680,430 760,400 800,420 800,500 0,500"
+           fill="#0d1520" opacity="0.9"/>
+
+  <!-- Pine tree silhouettes on foreground -->
+  <g fill="#0a0f18" opacity="0.85">
+    <!-- Tree 1 -->
+    <polygon points="60,430 68,395 72,405 78,380 82,395 88,370 80,390 72,375 65,395 60,430"/>
+    <rect x="72" y="420" width="4" height="12"/>
+    <!-- Tree 2 -->
+    <polygon points="120,425 128,390 132,400 138,375 142,390 148,365 140,385 132,370 125,390 120,425"/>
+    <rect x="132" y="416" width="4" height="12"/>
+    <!-- Tree 3 -->
+    <polygon points="700,425 708,388 712,400 718,372 722,388 728,360 720,380 712,365 705,388 700,425"/>
+    <rect x="712" y="416" width="4" height="12"/>
+    <!-- Tree 4 -->
+    <polygon points="740,430 747,400 750,408 755,385 758,398 762,375 756,393 750,382 744,400 740,430"/>
+    <rect x="749" y="422" width="4" height="10"/>
+    <!-- Tree 5 -->
+    <polygon points="30,440 36,415 39,422 43,405 46,415 50,395 44,412 39,402 34,418 30,440"/>
+    <rect x="38" y="433" width="3" height="8"/>
+  </g>
+
+  <!-- Paraglider silhouette -->
+  <g transform="translate(550,130)" filter="url(#glow-a)" opacity="0.7">
+    <!-- Canopy -->
+    <path d="M-25,-15 Q0,-30 25,-15" fill="none" stroke="#ff7043" stroke-width="2.5"/>
+    <path d="M-25,-15 Q0,-28 25,-15" fill="#ff7043" opacity="0.15"/>
+    <!-- Lines -->
+    <line x1="-25" y1="-15" x2="0" y2="5" stroke="#ff7043" stroke-width="0.8" opacity="0.5"/>
+    <line x1="25" y1="-15" x2="0" y2="5" stroke="#ff7043" stroke-width="0.8" opacity="0.5"/>
+    <line x1="-15" y1="-18" x2="0" y2="5" stroke="#ff7043" stroke-width="0.5" opacity="0.3"/>
+    <line x1="15" y1="-18" x2="0" y2="5" stroke="#ff7043" stroke-width="0.5" opacity="0.3"/>
+    <!-- Pilot -->
+    <circle cx="0" cy="8" r="2.5" fill="#ff7043" opacity="0.6"/>
+  </g>
+
+  <!-- Rescue cross (subtle, bottom left) -->
+  <g transform="translate(100,465)" opacity="0.2">
+    <rect x="-8" y="-2" width="16" height="4" rx="1" fill="#ef5350"/>
+    <rect x="-2" y="-8" width="4" height="16" rx="1" fill="#ef5350"/>
+  </g>
+
+  <!-- Ski track marks on snow -->
+  <g stroke="#b0bec5" stroke-width="0.8" opacity="0.2" fill="none">
+    <path d="M380,250 Q390,280 395,320 Q398,350 410,400"/>
+    <path d="M383,250 Q393,280 398,320 Q401,350 413,400"/>
+  </g>
+
+  <!-- Moon -->
+  <circle cx="680" cy="60" r="20" fill="#e8eaf6" opacity="0.15"/>
+  <circle cx="688" cy="55" r="18" fill="url(#sky)"/>
+</svg>

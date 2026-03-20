@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="800" height="500">
+  <defs>
+    <linearGradient id="bg-i" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#1a1f2e"/>
+    </linearGradient>
+    <linearGradient id="bar-grad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#00c853;stop-opacity:0.8"/>
+      <stop offset="100%" style="stop-color:#69f0ae;stop-opacity:0.4"/>
+    </linearGradient>
+    <linearGradient id="line-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffd740;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ffd740;stop-opacity:0.8"/>
+    </linearGradient>
+    <filter id="glow-i">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="500" fill="url(#bg-i)"/>
+
+  <!-- Grid -->
+  <g opacity="0.06" stroke="#69f0ae" stroke-width="0.5">
+    <line x1="0" y1="80" x2="800" y2="80"/><line x1="0" y1="160" x2="800" y2="160"/>
+    <line x1="0" y1="240" x2="800" y2="240"/><line x1="0" y1="320" x2="800" y2="320"/>
+    <line x1="0" y1="400" x2="800" y2="400"/>
+    <line x1="100" y1="0" x2="100" y2="500"/><line x1="200" y1="0" x2="200" y2="500"/>
+    <line x1="300" y1="0" x2="300" y2="500"/><line x1="400" y1="0" x2="400" y2="500"/>
+    <line x1="500" y1="0" x2="500" y2="500"/><line x1="600" y1="0" x2="600" y2="500"/>
+    <line x1="700" y1="0" x2="700" y2="500"/>
+  </g>
+
+  <!-- Bar chart (background, left) -->
+  <g opacity="0.35">
+    <rect x="80" y="300" width="28" height="120" rx="3" fill="url(#bar-grad)"/>
+    <rect x="120" y="260" width="28" height="160" rx="3" fill="url(#bar-grad)"/>
+    <rect x="160" y="330" width="28" height="90" rx="3" fill="url(#bar-grad)"/>
+    <rect x="200" y="220" width="28" height="200" rx="3" fill="url(#bar-grad)"/>
+    <rect x="240" y="280" width="28" height="140" rx="3" fill="url(#bar-grad)"/>
+    <rect x="280" y="200" width="28" height="220" rx="3" fill="url(#bar-grad)"/>
+    <rect x="320" y="240" width="28" height="180" rx="3" fill="url(#bar-grad)"/>
+  </g>
+
+  <!-- Rising trend line (center) -->
+  <g filter="url(#glow-i)">
+    <polyline points="100,380 170,350 240,360 310,300 380,270 450,220 520,200 590,150 660,120 730,80"
+              fill="none" stroke="#69f0ae" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Data points -->
+    <circle cx="100" cy="380" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="170" cy="350" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="240" cy="360" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="310" cy="300" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="380" cy="270" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="450" cy="220" r="5" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="520" cy="200" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="590" cy="150" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="660" cy="120" r="4" fill="#0d1117" stroke="#69f0ae" stroke-width="2"/>
+    <circle cx="730" cy="80" r="5" fill="#0d1117" stroke="#69f0ae" stroke-width="2.5"/>
+  </g>
+
+  <!-- Area fill under trend -->
+  <polygon points="100,380 170,350 240,360 310,300 380,270 450,220 520,200 590,150 660,120 730,80 730,420 100,420"
+           fill="#69f0ae" opacity="0.06"/>
+
+  <!-- Secondary trend line -->
+  <polyline points="100,400 200,380 300,370 400,340 500,310 600,280 700,250"
+            fill="none" stroke="#ffd740" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.4" stroke-linecap="round"/>
+
+  <!-- Candlestick hints (right side) -->
+  <g opacity="0.3">
+    <line x1="520" y1="340" x2="520" y2="400" stroke="#69f0ae" stroke-width="1"/>
+    <rect x="514" y="355" width="12" height="25" rx="1" fill="#69f0ae" opacity="0.6"/>
+    <line x1="560" y1="320" x2="560" y2="410" stroke="#ef5350" stroke-width="1"/>
+    <rect x="554" y="340" width="12" height="35" rx="1" fill="#ef5350" opacity="0.5"/>
+    <line x1="600" y1="310" x2="600" y2="390" stroke="#69f0ae" stroke-width="1"/>
+    <rect x="594" y="325" width="12" height="30" rx="1" fill="#69f0ae" opacity="0.6"/>
+    <line x1="640" y1="290" x2="640" y2="380" stroke="#69f0ae" stroke-width="1"/>
+    <rect x="634" y="300" width="12" height="40" rx="1" fill="#69f0ae" opacity="0.6"/>
+    <line x1="680" y1="280" x2="680" y2="370" stroke="#ef5350" stroke-width="1"/>
+    <rect x="674" y="300" width="12" height="30" rx="1" fill="#ef5350" opacity="0.5"/>
+    <line x1="720" y1="260" x2="720" y2="360" stroke="#69f0ae" stroke-width="1"/>
+    <rect x="714" y="270" width="12" height="45" rx="1" fill="#69f0ae" opacity="0.6"/>
+  </g>
+
+  <!-- Pie chart (top right) -->
+  <g transform="translate(680,120)" opacity="0.25">
+    <circle cx="0" cy="0" r="45" fill="none" stroke="#1a2744" stroke-width="14"/>
+    <circle cx="0" cy="0" r="45" fill="none" stroke="#69f0ae" stroke-width="14"
+            stroke-dasharray="113 170" stroke-dashoffset="0" transform="rotate(-90)"/>
+    <circle cx="0" cy="0" r="45" fill="none" stroke="#ffd740" stroke-width="14"
+            stroke-dasharray="57 226" stroke-dashoffset="-113" transform="rotate(-90)"/>
+    <circle cx="0" cy="0" r="45" fill="none" stroke="#4fc3f7" stroke-width="14"
+            stroke-dasharray="42 241" stroke-dashoffset="-170" transform="rotate(-90)"/>
+  </g>
+
+  <!-- Upward arrow indicator -->
+  <g transform="translate(730,80)" filter="url(#glow-i)" opacity="0.7">
+    <polygon points="0,-15 8,0 3,0 3,12 -3,12 -3,0 -8,0" fill="#69f0ae"/>
+  </g>
+
+  <!-- Floating number particles -->
+  <g font-family="monospace" fill="#69f0ae" opacity="0.12" font-size="11">
+    <text x="60" y="80">+12.4%</text>
+    <text x="680" y="420">$2.4M</text>
+    <text x="420" y="60">ROI</text>
+    <text x="180" y="170">IRR 18%</text>
+    <text x="550" y="470">CAGR</text>
+  </g>
+
+  <!-- Subtle glow -->
+  <circle cx="400" cy="250" r="180" fill="#69f0ae" opacity="0.02"/>
+  <circle cx="400" cy="250" r="100" fill="#69f0ae" opacity="0.03"/>
+</svg>

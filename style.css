@@ -313,6 +313,7 @@ img {
 .sphere-activities:hover { border-color: var(--color-activities); }
 
 .sphere-icon {
+    display: none;
     margin-bottom: 20px;
     color: var(--color-text-muted);
     transition: color var(--transition);
@@ -1296,9 +1297,9 @@ img {
 .icon-dark { display: none; }
 .icon-clean { display: block; }
 
-/* ===== Sphere Images (hidden by default, shown in clean theme) ===== */
+/* ===== Sphere Images (shown in both themes) ===== */
 .sphere-image {
-    display: none;
+    display: block;
     width: 100%;
     height: 200px;
     overflow: hidden;
@@ -1714,7 +1715,8 @@ body.clean-theme .activity-list li::before {
         border-bottom: 1px solid #eee;
     }
 
-    body.clean-theme .sphere-image {
+    body.clean-theme .sphere-image,
+    .sphere-image {
         height: 180px;
     }
 }
