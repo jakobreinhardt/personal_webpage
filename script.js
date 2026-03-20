@@ -50,7 +50,7 @@ const observer = new IntersectionObserver((entries) => {
 
 // Add fade-in class to animatable elements
 document.querySelectorAll(
-    '.timeline-item, .highlight-card, .skill-category, .education-card, .engagement-card, .contact-link, .about-text, .sphere, .publication-item, .investment-card, .investment-note, .other-card, .activity-feature, .sport-card'
+    '.timeline-item, .highlight-card, .skill-category, .education-card, .engagement-card, .contact-link, .about-text, .sphere, .publication-item, .investment-card, .investment-note, .other-card, .activity-feature, .sport-card, .tour-card, .tour-suggestion'
 ).forEach(el => {
     el.classList.add('fade-in');
     observer.observe(el);
@@ -89,5 +89,26 @@ if (navLinksAll.length > 0) {
                 link.style.color = 'var(--color-text-heading)';
             }
         });
+    });
+}
+
+// Tour suggestion form (placeholder until database is connected)
+const tourForm = document.getElementById('tour-suggestion-form');
+if (tourForm) {
+    tourForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const input = document.getElementById('tour-input');
+        const value = input.value.trim();
+        if (!value) return;
+
+        // TODO: Send to backend/database once implemented
+        // Example: fetch('/api/tours', { method: 'POST', body: JSON.stringify({ tour: value }) })
+
+        input.value = '';
+        const note = tourForm.parentElement.querySelector('.tour-form-note');
+        if (note) {
+            note.textContent = 'Thank you! Your suggestion has been received.';
+            note.style.color = 'var(--color-activities)';
+        }
     });
 }
