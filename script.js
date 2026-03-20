@@ -92,7 +92,10 @@ if (navLinksAll.length > 0) {
     });
 }
 
-// Tour suggestion form (placeholder until database is connected)
+// Tour suggestion form
+// Set API_BASE to your Render deployment URL, e.g. "https://personal-webpage-api.onrender.com"
+const API_BASE = 'https://personal-webpage-9nlh.onrender.com';
+
 const tourForm = document.getElementById('tour-suggestion-form');
 if (tourForm) {
     tourForm.addEventListener('submit', function(e) {
@@ -101,14 +104,40 @@ if (tourForm) {
         const value = input.value.trim();
         if (!value) return;
 
-        // TODO: Send to backend/database once implemented
-        // Example: fetch('/api/tours', { method: 'POST', body: JSON.stringify({ tour: value }) })
+        const btn = tourForm.querySelector('.tour-submit-btn');
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
 
-        input.value = '';
-        const note = tourForm.parentElement.querySelector('.tour-form-note');
-        if (note) {
-            note.textContent = 'Thank you! Your suggestion has been received.';
-            note.style.color = 'var(--color-activities)';
-        }
+        fetch(API_BASE + '/api/tours', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tour: value })
+        })
+        .then(res => {
+            const note = tourForm.parentElement.querySelector('.tour-form-note');
+            if (res.ok) {
+                input.value = '';
+                if (note) {
+                    note.textContent = 'Thank you! Your suggestion has been received.';
+                    note.style.color = 'var(--color-activities)';
+                }
+            } else {
+                if (note) {
+                    note.textContent = 'Something went wrong. Please try again.';
+                    note.style.color = '#e74c3c';
+                }
+            }
+        })
+        .catch(() => {
+            const note = tourForm.parentElement.querySelector('.tour-form-note');
+            if (note) {
+                note.textContent = 'Could not connect to server. Please try again later.';
+                note.style.color = '#e74c3c';
+            }
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = 'Submit';
+        });
     });
 }
