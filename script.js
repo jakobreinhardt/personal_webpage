@@ -94,7 +94,7 @@ if (navLinksAll.length > 0) {
 
 // Tour suggestion form
 // Set API_BASE to your Render deployment URL, e.g. "https://personal-webpage-api.onrender.com"
-const API_BASE = 'https://personal-webpage-9nlh.onrender.com';
+const API_BASE = 'https://personal-webpage-o7x2.onrender.com';
 
 const tourForm = document.getElementById('tour-suggestion-form');
 if (tourForm) {
