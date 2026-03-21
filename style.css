@@ -496,6 +496,14 @@ img {
     color: var(--color-primary);
 }
 
+.highlight-logo {
+    display: block;
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    margin: 0 auto 8px;
+}
+
 .highlight-card h3 {
     font-size: 0.9rem;
     font-weight: 600;
