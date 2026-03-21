@@ -1204,6 +1204,34 @@ img {
     margin-top: 8px;
 }
 
+.recent-suggestions {
+    margin-top: 1.2rem;
+}
+
+.recent-suggestions h4 {
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+}
+
+.recent-suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recent-suggestions li {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    line-height: 1.4;
+}
+
+.recent-suggestions li:last-child {
+    border-bottom: none;
+}
+
 .sr-only {
     position: absolute;
     width: 1px;

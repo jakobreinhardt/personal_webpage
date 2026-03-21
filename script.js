@@ -138,6 +138,29 @@ if (tourForm) {
         .finally(() => {
             btn.disabled = false;
             btn.textContent = 'Submit';
+            loadRecentSuggestions();
         });
     });
 }
+
+function loadRecentSuggestions() {
+    const container = document.getElementById('recent-suggestions');
+    if (!container) return;
+
+    fetch(API_BASE + '/api/tours')
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+            const recent = data.slice(0, 3);
+            if (recent.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML =
+                '<h4>Recent Suggestions</h4><ul>' +
+                recent.map(t => '<li>' + t.text.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</li>').join('') +
+                '</ul>';
+        })
+        .catch(() => { container.innerHTML = ''; });
+}
+
+loadRecentSuggestions();
