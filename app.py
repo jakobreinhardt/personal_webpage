@@ -2,10 +2,13 @@ import os
 import sqlite3
 from datetime import datetime, timezone
 
+from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+
+load_dotenv()
 
 app = Flask(__name__, static_folder=".", static_url_path="")
 
