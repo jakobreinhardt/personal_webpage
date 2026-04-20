@@ -96,6 +96,25 @@ img {
     max-width: 700px;
 }
 
+.section-subtitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 24px;
+    margin-top: 12px;
+    letter-spacing: 0.02em;
+}
+
+.section-subtitle + .portfolio-grid {
+    margin-bottom: 48px;
+}
+
+.section-subtitle-note {
+    font-weight: 400;
+    font-size: 0.9rem;
+    opacity: 0.65;
+}
+
 /* Sphere-specific accent colors */
 .subpage-researcher .section-title::after { background: linear-gradient(90deg, var(--color-researcher), #7dd3fc); }
 .subpage-investor .section-title::after { background: linear-gradient(90deg, var(--color-investor), #c4b5fd); }
