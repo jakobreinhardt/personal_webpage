@@ -1,7 +1,10 @@
+import atexit
 import os
 import sqlite3
+import threading
 from datetime import datetime, timezone
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
@@ -49,6 +52,32 @@ def init_db():
             )
             """
         )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS mountains (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL UNIQUE,
+                latitude REAL,
+                longitude REAL,
+                geocoded_at TEXT
+            )
+            """
+        )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS mountain_weather (
+                id SERIAL PRIMARY KEY,
+                mountain_id INTEGER REFERENCES mountains(id),
+                date TEXT NOT NULL,
+                temperature_c REAL,
+                weather_code INTEGER,
+                weather_desc TEXT,
+                wind_speed_kmh REAL,
+                fetched_at TEXT NOT NULL,
+                UNIQUE(mountain_id, date)
+            )
+            """
+        )
     else:
         cur.execute(
             """
@@ -56,6 +85,32 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 text TEXT NOT NULL,
                 created_at TEXT NOT NULL
+            )
+            """
+        )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS mountains (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL UNIQUE,
+                latitude REAL,
+                longitude REAL,
+                geocoded_at TEXT
+            )
+            """
+        )
+        cur.execute(
+            """
+            CREATE TABLE IF NOT EXISTS mountain_weather (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                mountain_id INTEGER REFERENCES mountains(id),
+                date TEXT NOT NULL,
+                temperature_c REAL,
+                weather_code INTEGER,
+                weather_desc TEXT,
+                wind_speed_kmh REAL,
+                fetched_at TEXT NOT NULL,
+                UNIQUE(mountain_id, date)
             )
             """
         )
@@ -117,7 +172,48 @@ def list_tours():
     return jsonify(rows)
 
 
+@app.route("/api/mountain-weather", methods=["GET"])
+def get_mountain_weather():
+    """Return the latest available weather record for each tracked mountain."""
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute(
+        """
+        SELECT m.name, mw.date, mw.temperature_c, mw.weather_code,
+               mw.weather_desc, mw.wind_speed_kmh, mw.fetched_at
+        FROM mountains m
+        JOIN mountain_weather mw ON mw.mountain_id = m.id
+        WHERE mw.date = (
+            SELECT MAX(mw2.date) FROM mountain_weather mw2
+            WHERE mw2.mountain_id = m.id
+        )
+        ORDER BY m.name
+        """
+    )
+    rows = db_rows_to_dicts(conn, cur)
+    cur.close()
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/api/admin/update-weather", methods=["POST"])
+def trigger_weather_update():
+    """Manually trigger a weather update run (admin / debugging use)."""
+    from weather_service import run_weather_update
+    threading.Thread(target=run_weather_update, daemon=True).start()
+    return jsonify({"status": "update started"}), 202
+
+
 init_db()
+
+# ---------- daily weather scheduler ----------
+# Guard against Flask debug reloader starting a second scheduler process.
+if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    from weather_service import run_weather_update as _run_weather_update
+    _scheduler = BackgroundScheduler()
+    _scheduler.add_job(_run_weather_update, "cron", hour=6, minute=0)
+    _scheduler.start()
+    atexit.register(lambda: _scheduler.shutdown(wait=False))
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
