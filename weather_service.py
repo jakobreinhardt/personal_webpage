@@ -169,7 +169,13 @@ def run_weather_update() -> None:
 
     # LLM extraction + seed mountains (deduplicated)
     llm_mountains = extract_mountains(texts)
-    all_mountains = list({m for m in llm_mountains + SEED_MOUNTAINS if m})
+
+    # Also include all mountains already tracked in the DB
+    cur.execute("SELECT name FROM mountains")
+    db_rows = cur.fetchall()
+    existing_mountains = [r[0] if DATABASE_URL else r["name"] for r in db_rows]
+
+    all_mountains = list({m for m in llm_mountains + SEED_MOUNTAINS + existing_mountains if m})
     log.info("Mountains to update: %s", all_mountains)
 
     today = date.today().isoformat()

@@ -187,7 +187,8 @@ def get_mountain_weather():
             SELECT MAX(mw2.date) FROM mountain_weather mw2
             WHERE mw2.mountain_id = m.id
         )
-        ORDER BY m.name
+        ORDER BY m.id DESC
+        LIMIT 3
         """
     )
     rows = db_rows_to_dicts(conn, cur)
