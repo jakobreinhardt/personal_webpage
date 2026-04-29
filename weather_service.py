@@ -21,7 +21,7 @@ load_dotenv()
 
 log = logging.getLogger(__name__)
 
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 # Mountains always tracked regardless of user submissions (from the static tour cards)
@@ -60,40 +60,34 @@ def _ph() -> str:
 # ---------- mountain extraction ----------
 
 def extract_mountains(texts: list[str]) -> list[str]:
-    """Use OpenAI to extract unique mountain/peak names from a list of tour texts.
+    """Use Anthropic Claude to extract unique mountain/peak names from a list of tour texts.
 
-    Returns an empty list if OPENAI_API_KEY is not set or no mountains are found.
+    Returns an empty list if ANTHROPIC_API_KEY is not set or no mountains are found.
     """
-    if not OPENAI_API_KEY:
-        log.warning("OPENAI_API_KEY not set — skipping LLM mountain extraction")
+    if not ANTHROPIC_API_KEY:
+        log.warning("ANTHROPIC_API_KEY not set — skipping LLM mountain extraction")
         return []
     if not texts:
         return []
 
-    from openai import OpenAI
+    import anthropic
 
-    client = OpenAI(api_key=OPENAI_API_KEY)
+    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
     combined = "\n".join(f"- {t}" for t in texts)
 
-    resp = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You extract mountain and peak names from ski tour descriptions. "
-                    'Return ONLY a JSON array of unique mountain names, e.g. ["Zugspitze","Thaneller"]. '
-                    "Include only actual mountain or peak names — not valleys, passes, huts, or villages. "
-                    "If no mountains are found, return []."
-                ),
-            },
-            {"role": "user", "content": combined},
-        ],
-        temperature=0,
+    resp = client.messages.create(
+        model="claude-haiku-4-5",
         max_tokens=300,
+        system=(
+            "You extract mountain and peak names from ski tour descriptions. "
+            'Return ONLY a JSON array of unique mountain names, e.g. ["Zugspitze","Thaneller"]. '
+            "Include only actual mountain or peak names — not valleys, passes, huts, or villages. "
+            "If no mountains are found, return []."
+        ),
+        messages=[{"role": "user", "content": combined}],
     )
 
-    raw = resp.choices[0].message.content.strip()
+    raw = resp.content[0].text.strip()
     try:
         names = json.loads(raw)
         return [n.strip() for n in names if isinstance(n, str) and n.strip()]

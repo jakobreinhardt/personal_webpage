@@ -3,6 +3,6 @@ flask-cors
 gunicorn
 psycopg2-binary
 python-dotenv
-openai
+anthropic
 requests
 apscheduler
