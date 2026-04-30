@@ -1278,6 +1278,25 @@ img {
     margin-bottom: 32px;
 }
 
+.mountain-chart-section {
+    margin-top: 32px;
+    margin-bottom: 0;
+}
+
+.mountain-chart-container {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 20px 16px 12px;
+    overflow-x: auto;
+}
+
+.mountain-chart-container svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
 .mountain-weather-title {
     font-size: 1rem;
     font-weight: 600;

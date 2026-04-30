@@ -24,8 +24,7 @@ log = logging.getLogger(__name__)
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# Mountains always tracked regardless of user submissions (from the static tour cards)
-SEED_MOUNTAINS = ["Thaneller", "Daniel"]
+SEED_MOUNTAINS: list[str] = []
 
 WMO_DESCRIPTIONS: dict[int, str] = {
     0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",

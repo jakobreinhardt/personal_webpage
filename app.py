@@ -200,41 +200,88 @@ def list_tours():
     return jsonify(rows)
 
 
-@app.route("/api/mountain-weather", methods=["GET"])
-def get_mountain_weather():
-    """Return the latest weather for the mountains shown on the activities page.
-
-    Always includes the two seed mountains (Thaneller, Daniel) plus up to 3
-    mountains most recently added by the daily extraction service (i.e. extracted
-    from the 3 newest user-submitted tour suggestions). Each mountain contributes
-    its most recent daily weather record.
-    """
-    from weather_service import SEED_MOUNTAINS
+@app.route("/api/mountain-mentions", methods=["GET"])
+def get_mountain_mentions():
+    """Return up to 20 mountains sorted by how many user submissions mention them."""
     conn = get_db()
     cur = conn.cursor()
-    seeds = "','".join(SEED_MOUNTAINS)
-    ph = "%s" if DATABASE_URL else "?"
-    cur.execute(
-        f"""
-        SELECT m.name, mw.date, mw.temperature_c, mw.weather_code,
-               mw.weather_desc, mw.wind_speed_kmh, mw.fetched_at
-        FROM mountains m
-        JOIN mountain_weather mw ON mw.mountain_id = m.id
-        WHERE mw.date = (
-            SELECT MAX(mw2.date) FROM mountain_weather mw2
-            WHERE mw2.mountain_id = m.id
+    if DATABASE_URL:
+        cur.execute(
+            """
+            SELECT m.name, COUNT(ts.id) AS mention_count
+            FROM mountains m
+            LEFT JOIN tour_suggestions ts ON ts.text ILIKE '%' || m.name || '%'
+            GROUP BY m.name
+            ORDER BY mention_count DESC, m.name
+            LIMIT 20
+            """
         )
-        AND (
-            m.name IN ('{seeds}')
-            OR m.id IN (
-                SELECT id FROM mountains
-                WHERE name NOT IN ('{seeds}')
-                ORDER BY id DESC LIMIT 3
+    else:
+        cur.execute(
+            """
+            SELECT m.name, COUNT(ts.id) AS mention_count
+            FROM mountains m
+            LEFT JOIN tour_suggestions ts ON LOWER(ts.text) LIKE '%' || LOWER(m.name) || '%'
+            GROUP BY m.name
+            ORDER BY mention_count DESC, m.name
+            LIMIT 20
+            """
+        )
+    rows = db_rows_to_dicts(conn, cur)
+    cur.close()
+    conn.close()
+    return jsonify(rows)
+
+
+@app.route("/api/mountain-weather", methods=["GET"])
+def get_mountain_weather():
+    """Return weather for the top 3 mountains by user mention count."""
+    conn = get_db()
+    cur = conn.cursor()
+    if DATABASE_URL:
+        cur.execute(
+            """
+            SELECT m.name, mw.date, mw.temperature_c, mw.weather_code,
+                   mw.weather_desc, mw.wind_speed_kmh, mw.fetched_at
+            FROM mountains m
+            JOIN mountain_weather mw ON mw.mountain_id = m.id
+            WHERE mw.date = (
+                SELECT MAX(mw2.date) FROM mountain_weather mw2
+                WHERE mw2.mountain_id = m.id
             )
+            AND m.id IN (
+                SELECT m2.id
+                FROM mountains m2
+                LEFT JOIN tour_suggestions ts ON ts.text ILIKE '%' || m2.name || '%'
+                GROUP BY m2.id, m2.name
+                ORDER BY COUNT(ts.id) DESC, m2.name
+                LIMIT 3
+            )
+            ORDER BY m.name
+            """
         )
-        ORDER BY m.name
-        """
-    )
+    else:
+        cur.execute(
+            """
+            SELECT m.name, mw.date, mw.temperature_c, mw.weather_code,
+                   mw.weather_desc, mw.wind_speed_kmh, mw.fetched_at
+            FROM mountains m
+            JOIN mountain_weather mw ON mw.mountain_id = m.id
+            WHERE mw.date = (
+                SELECT MAX(mw2.date) FROM mountain_weather mw2
+                WHERE mw2.mountain_id = m.id
+            )
+            AND m.id IN (
+                SELECT m2.id
+                FROM mountains m2
+                LEFT JOIN tour_suggestions ts ON LOWER(ts.text) LIKE '%' || LOWER(m2.name) || '%'
+                GROUP BY m2.id, m2.name
+                ORDER BY COUNT(ts.id) DESC, m2.name
+                LIMIT 3
+            )
+            ORDER BY m.name
+            """
+        )
     rows = db_rows_to_dicts(conn, cur)
     cur.close()
     conn.close()
