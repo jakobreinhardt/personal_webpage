@@ -180,6 +180,9 @@ def add_tour():
     cur.close()
     conn.close()
 
+    from weather_service import run_weather_update
+    threading.Thread(target=run_weather_update, daemon=True).start()
+
     return jsonify({"status": "ok", "created_at": created_at}), 201
 
 

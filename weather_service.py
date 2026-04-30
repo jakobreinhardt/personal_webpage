@@ -1,12 +1,13 @@
-"""Daily weather service for mountain tours.
+"""Weather service for mountain tours.
 
 Reads tour suggestions from the database, extracts mountain names using
-OpenAI, geocodes them with the free Open-Meteo geocoding API, then stores
+Anthropic Claude, geocodes them with the free Open-Meteo geocoding API, then stores
 one weather record per mountain per day using the free Open-Meteo forecast API.
 
 Usage:
     python weather_service.py           # run once immediately
-    called from app.py via APScheduler  # runs daily at 06:00 UTC
+    called from app.py on every tour submission (background thread)
+    called from Render cron job         # runs hourly
 """
 
 import json
