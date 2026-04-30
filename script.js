@@ -238,11 +238,6 @@ function loadMountainChart() {
             const maxCount = Math.max(...data.map(d => d.mention_count), 1);
             const svgHeight = data.length * (barHeight + barGap) + 8;
 
-            const style = getComputedStyle(document.documentElement);
-            const accentColor = style.getPropertyValue('--color-activities').trim() || '#34d399';
-            const textMuted = style.getPropertyValue('--color-text-muted').trim() || '#94a3b8';
-            const textHeading = style.getPropertyValue('--color-text-heading').trim() || '#f1f5f9';
-
             const bars = data.map((d, i) => {
                 const y = i * (barHeight + barGap) + 4;
                 const barW = Math.max(d.mention_count > 0 ? (d.mention_count / maxCount) * barAreaWidth : 2, 2);
@@ -251,12 +246,13 @@ function loadMountainChart() {
                 return `<g>
                     <text x="${labelWidth - 8}" y="${y + barHeight / 2 + 5}"
                         text-anchor="end" font-size="12" font-family="inherit"
-                        fill="${isTop ? textHeading : textMuted}"
+                        class="chart-label ${isTop ? 'chart-label-top' : 'chart-label-dim'}"
                         font-weight="${isTop ? '600' : '400'}">${name}</text>
                     <rect x="${labelWidth}" y="${y}" width="${barW}" height="${barHeight}"
-                        rx="4" fill="${accentColor}" opacity="${isTop ? '1' : '0.5'}"/>
+                        rx="4" class="chart-bar" opacity="${isTop ? '1' : '0.5'}"/>
                     <text x="${labelWidth + barW + 7}" y="${y + barHeight / 2 + 5}"
-                        font-size="12" font-family="inherit" fill="${textMuted}">${d.mention_count}</text>
+                        font-size="12" font-family="inherit"
+                        class="chart-label chart-label-dim">${d.mention_count}</text>
                 </g>`;
             }).join('');
 

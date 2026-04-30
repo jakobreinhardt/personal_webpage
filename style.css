@@ -1297,6 +1297,18 @@ img {
     height: auto;
 }
 
+.mountain-chart-container .chart-label {
+    fill: var(--color-text-muted);
+}
+
+.mountain-chart-container .chart-label-top {
+    fill: var(--color-text-heading);
+}
+
+.mountain-chart-container .chart-bar {
+    fill: var(--color-activities);
+}
+
 .mountain-weather-title {
     font-size: 1rem;
     font-weight: 600;
