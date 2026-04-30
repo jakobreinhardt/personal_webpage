@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 log = logging.getLogger(__name__)
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
@@ -164,13 +165,20 @@ def run_weather_update() -> None:
        (skips mountains that already have a record for today).
     """
     log.info("Starting weather update")
+    try:
+        _run_weather_update()
+    except Exception:
+        log.exception("Unhandled error in weather update")
+
+
+def _run_weather_update() -> None:
     conn = _get_db()
     cur = conn.cursor()
     ph = _ph()
 
-    # Extract mountains from the 3 most recently submitted tours only
+    # Extract mountains from all submitted tours
     cur.execute(
-        "SELECT text FROM tour_suggestions ORDER BY created_at DESC LIMIT 3"
+        "SELECT text FROM tour_suggestions ORDER BY created_at DESC"
     )
     rows = cur.fetchall()
     texts = [r[0] if DATABASE_URL else r["text"] for r in rows]
@@ -267,5 +275,4 @@ def run_weather_update() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
     run_weather_update()
