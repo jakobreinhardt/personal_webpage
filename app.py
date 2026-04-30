@@ -40,6 +40,14 @@ def get_db():
 
 
 def init_db():
+    """Create all required tables if they don't exist yet.
+
+    Called once at startup. Safe to call repeatedly — uses CREATE TABLE IF NOT EXISTS.
+    Three tables are managed:
+      - tour_suggestions: user-submitted tour texts from the activities page form
+      - mountains: one row per unique mountain name, storing its coordinates
+      - mountain_weather: daily weather snapshot per mountain (one row per mountain per day)
+    """
     conn = get_db()
     cur = conn.cursor()
     if DATABASE_URL:
@@ -120,7 +128,12 @@ def init_db():
 
 
 def db_rows_to_dicts(conn, cur):
-    """Convert cursor results to list of dicts for both SQLite and PostgreSQL."""
+    """Convert cursor rows to a list of plain dicts.
+
+    PostgreSQL (psycopg2) returns plain tuples, so column names are read from
+    the cursor description. SQLite is configured with row_factory=sqlite3.Row
+    which already supports dict-style access. Both paths produce the same output.
+    """
     if DATABASE_URL:
         columns = [desc[0] for desc in cur.description]
         return [dict(zip(columns, row)) for row in cur.fetchall()]
@@ -132,11 +145,22 @@ def db_rows_to_dicts(conn, cur):
 
 @app.route("/")
 def index():
+    """Serve the static index.html entry page.
+
+    Used only during local development — in production GitHub Pages serves
+    the static files directly and this route is never reached.
+    """
     return send_from_directory(".", "index.html")
 
 
 @app.route("/api/tours", methods=["POST"])
 def add_tour():
+    """Accept a new tour suggestion submitted via the activities page form.
+
+    Expects JSON body: { "tour": "<text>" }
+    Text is trimmed and capped at 500 characters before being stored.
+    Returns 400 if the tour text is missing or blank.
+    """
     data = request.get_json(silent=True)
     if not data or not data.get("tour", "").strip():
         return jsonify({"error": "tour text is required"}), 400
@@ -161,6 +185,10 @@ def add_tour():
 
 @app.route("/api/tours", methods=["GET"])
 def list_tours():
+    """Return all tour suggestions, newest first.
+
+    Used by the activities page to show recent suggestions below the form.
+    """
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
@@ -174,11 +202,20 @@ def list_tours():
 
 @app.route("/api/mountain-weather", methods=["GET"])
 def get_mountain_weather():
-    """Return the latest available weather record for each tracked mountain."""
+    """Return the latest weather for the mountains shown on the activities page.
+
+    Always includes the two seed mountains (Thaneller, Daniel) plus up to 3
+    mountains most recently added by the daily extraction service (i.e. extracted
+    from the 3 newest user-submitted tour suggestions). Each mountain contributes
+    its most recent daily weather record.
+    """
+    from weather_service import SEED_MOUNTAINS
     conn = get_db()
     cur = conn.cursor()
+    seeds = "','".join(SEED_MOUNTAINS)
+    ph = "%s" if DATABASE_URL else "?"
     cur.execute(
-        """
+        f"""
         SELECT m.name, mw.date, mw.temperature_c, mw.weather_code,
                mw.weather_desc, mw.wind_speed_kmh, mw.fetched_at
         FROM mountains m
@@ -187,8 +224,15 @@ def get_mountain_weather():
             SELECT MAX(mw2.date) FROM mountain_weather mw2
             WHERE mw2.mountain_id = m.id
         )
-        ORDER BY m.id DESC
-        LIMIT 3
+        AND (
+            m.name IN ('{seeds}')
+            OR m.id IN (
+                SELECT id FROM mountains
+                WHERE name NOT IN ('{seeds}')
+                ORDER BY id DESC LIMIT 3
+            )
+        )
+        ORDER BY m.name
         """
     )
     rows = db_rows_to_dicts(conn, cur)
@@ -199,7 +243,11 @@ def get_mountain_weather():
 
 @app.route("/api/admin/update-weather", methods=["POST"])
 def trigger_weather_update():
-    """Manually trigger a weather update run (admin / debugging use)."""
+    """Manually trigger the weather update pipeline in a background thread.
+
+    Useful for testing or forcing a refresh outside of the daily 06:00 UTC schedule.
+    The update runs asynchronously so this endpoint returns immediately.
+    """
     from weather_service import run_weather_update
     threading.Thread(target=run_weather_update, daemon=True).start()
     return jsonify({"status": "update started"}), 202

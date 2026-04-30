@@ -88,6 +88,12 @@ def extract_mountains(texts: list[str]) -> list[str]:
     )
 
     raw = resp.content[0].text.strip()
+    # Strip markdown code fences if present (e.g. ```json ... ```)
+    if raw.startswith("```"):
+        raw = raw.split("```")[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+        raw = raw.strip()
     try:
         names = json.loads(raw)
         return [n.strip() for n in names if isinstance(n, str) and n.strip()]
@@ -152,7 +158,7 @@ def run_weather_update() -> None:
 
     Steps:
     1. Read all tour_suggestions texts from the DB.
-    2. Extract mountain names with OpenAI (plus always include SEED_MOUNTAINS).
+    2. Extract mountain names with Anthropic (plus always include SEED_MOUNTAINS).
     3. Geocode any new mountains and persist them in the mountains table.
     4. Fetch today's weather for each mountain and store it in mountain_weather
        (skips mountains that already have a record for today).
@@ -162,15 +168,17 @@ def run_weather_update() -> None:
     cur = conn.cursor()
     ph = _ph()
 
-    # Collect tour texts from user submissions
-    cur.execute("SELECT text FROM tour_suggestions")
+    # Extract mountains from the 3 most recently submitted tours only
+    cur.execute(
+        "SELECT text FROM tour_suggestions ORDER BY created_at DESC LIMIT 3"
+    )
     rows = cur.fetchall()
     texts = [r[0] if DATABASE_URL else r["text"] for r in rows]
 
     # LLM extraction + seed mountains (deduplicated)
     llm_mountains = extract_mountains(texts)
 
-    # Also include all mountains already tracked in the DB
+    # Also include all mountains already tracked in the DB so existing ones stay current
     cur.execute("SELECT name FROM mountains")
     db_rows = cur.fetchall()
     existing_mountains = [r[0] if DATABASE_URL else r["name"] for r in db_rows]
