@@ -1,16 +1,15 @@
 """Weather service for mountain tours.
 
-Reads tour suggestions from the database, extracts mountain names using
-Anthropic Claude, geocodes them with the free Open-Meteo geocoding API, then stores
+Fetches current weather for all mountains stored in the database and saves
 one weather record per mountain per day using the free Open-Meteo forecast API.
+
+Mountain extraction and geocoding live in mountain_extraction_service.py.
 
 Usage:
     python weather_service.py           # run once immediately
-    called from app.py on every tour submission (background thread)
     called from Render cron job         # runs hourly
 """
 
-import json
 import logging
 import os
 from datetime import date, datetime, timezone
@@ -23,10 +22,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s %(message)s")
 log = logging.getLogger(__name__)
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY")
 DATABASE_URL = os.environ.get("DATABASE_URL")
-
-SEED_MOUNTAINS: list[str] = []
 
 WMO_DESCRIPTIONS: dict[int, str] = {
     0: "Clear sky", 1: "Mainly clear", 2: "Partly cloudy", 3: "Overcast",
@@ -58,72 +54,7 @@ def _ph() -> str:
     return "%s" if DATABASE_URL else "?"
 
 
-# ---------- mountain extraction ----------
-
-def extract_mountains(texts: list[str]) -> list[str]:
-    """Use Anthropic Claude to extract unique mountain/peak names from a list of tour texts.
-
-    Returns an empty list if ANTHROPIC_API_KEY is not set or no mountains are found.
-    """
-    if not ANTHROPIC_API_KEY:
-        log.warning("ANTHROPIC_API_KEY not set — skipping LLM mountain extraction")
-        return []
-    if not texts:
-        return []
-
-    import anthropic
-
-    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-    combined = "\n".join(f"- {t}" for t in texts)
-
-    resp = client.messages.create(
-        model="claude-haiku-4-5",
-        max_tokens=300,
-        system=(
-            "You extract mountain and peak names from ski tour descriptions. "
-            'Return ONLY a JSON array of unique mountain names, e.g. ["Zugspitze","Thaneller"]. '
-            "Include only actual mountain or peak names — not valleys, passes, huts, or villages. "
-            "If no mountains are found, return []."
-        ),
-        messages=[{"role": "user", "content": combined}],
-    )
-
-    raw = resp.content[0].text.strip()
-    # Strip markdown code fences if present (e.g. ```json ... ```)
-    if raw.startswith("```"):
-        raw = raw.split("```")[1]
-        if raw.startswith("json"):
-            raw = raw[4:]
-        raw = raw.strip()
-    try:
-        names = json.loads(raw)
-        return [n.strip() for n in names if isinstance(n, str) and n.strip()]
-    except json.JSONDecodeError:
-        log.error("Failed to parse LLM response as JSON: %s", raw)
-        return []
-
-
-# ---------- geocoding & weather ----------
-
-def geocode_mountain(name: str) -> tuple[float, float] | None:
-    """Return (latitude, longitude) for a mountain name via Open-Meteo geocoding.
-
-    Open-Meteo geocoding is free and requires no API key.
-    Returns None if the mountain cannot be found.
-    """
-    resp = requests.get(
-        "https://geocoding-api.open-meteo.com/v1/search",
-        params={"name": name, "count": 1, "language": "en", "format": "json"},
-        timeout=10,
-    )
-    resp.raise_for_status()
-    results = resp.json().get("results")
-    if not results:
-        log.warning("No geocoding result for mountain: %s", name)
-        return None
-    r = results[0]
-    return float(r["latitude"]), float(r["longitude"])
-
+# ---------- weather ----------
 
 def fetch_weather(lat: float, lon: float) -> dict:
     """Fetch current weather from Open-Meteo (free, no API key required).
@@ -155,14 +86,10 @@ def fetch_weather(lat: float, lon: float) -> dict:
 # ---------- main update routine ----------
 
 def run_weather_update() -> None:
-    """Main entry point called by the scheduler (or directly as a script).
+    """Fetch today's weather for every mountain already in the DB.
 
-    Steps:
-    1. Read all tour_suggestions texts from the DB.
-    2. Extract mountain names with Anthropic (plus always include SEED_MOUNTAINS).
-    3. Geocode any new mountains and persist them in the mountains table.
-    4. Fetch today's weather for each mountain and store it in mountain_weather
-       (skips mountains that already have a record for today).
+    Mountains are populated by mountain_extraction_service.py.
+    Skips mountains that already have a record for today.
     """
     log.info("Starting weather update")
     try:
@@ -176,74 +103,35 @@ def _run_weather_update() -> None:
     cur = conn.cursor()
     ph = _ph()
 
-    # Extract mountains from all submitted tours
-    cur.execute(
-        "SELECT text FROM tour_suggestions ORDER BY created_at DESC"
-    )
+    cur.execute("SELECT id, name, latitude, longitude FROM mountains")
     rows = cur.fetchall()
-    texts = [r[0] if DATABASE_URL else r["text"] for r in rows]
+    if DATABASE_URL:
+        mountains = [{"id": r[0], "name": r[1], "latitude": r[2], "longitude": r[3]} for r in rows]
+    else:
+        mountains = [dict(r) for r in rows]
 
-    # LLM extraction + seed mountains (deduplicated)
-    llm_mountains = extract_mountains(texts)
-
-    # Also include all mountains already tracked in the DB so existing ones stay current
-    cur.execute("SELECT name FROM mountains")
-    db_rows = cur.fetchall()
-    existing_mountains = [r[0] if DATABASE_URL else r["name"] for r in db_rows]
-
-    all_mountains = list({m for m in llm_mountains + SEED_MOUNTAINS + existing_mountains if m})
-    log.info("Mountains to update: %s", all_mountains)
+    log.info("Mountains to update weather for: %s", [m["name"] for m in mountains])
 
     today = date.today().isoformat()
     fetched_at = datetime.now(timezone.utc).isoformat()
 
-    for name in all_mountains:
-        # Look up or create the mountain record
-        cur.execute(
-            f"SELECT id, latitude, longitude FROM mountains WHERE name = {ph}", (name,)
-        )
-        row = cur.fetchone()
-
-        if row is None:
-            coords = geocode_mountain(name)
-            if coords is None:
-                continue
-            lat, lon = coords
-            if DATABASE_URL:
-                cur.execute(
-                    "INSERT INTO mountains (name, latitude, longitude, geocoded_at)"
-                    " VALUES (%s, %s, %s, %s) RETURNING id",
-                    (name, lat, lon, fetched_at),
-                )
-                mountain_id = cur.fetchone()[0]
-            else:
-                cur.execute(
-                    "INSERT INTO mountains (name, latitude, longitude, geocoded_at)"
-                    " VALUES (?, ?, ?, ?)",
-                    (name, lat, lon, fetched_at),
-                )
-                mountain_id = cur.lastrowid
-            conn.commit()
-            log.info("Geocoded new mountain %s → %.4f, %.4f", name, lat, lon)
-        else:
-            mountain_id = row[0] if DATABASE_URL else row["id"]
-            lat = row[1] if DATABASE_URL else row["latitude"]
-            lon = row[2] if DATABASE_URL else row["longitude"]
-
-        # Skip if today's weather already stored
-        cur.execute(
-            f"SELECT id FROM mountain_weather WHERE mountain_id = {ph} AND date = {ph}",
-            (mountain_id, today),
-        )
-        if cur.fetchone():
-            log.info("Weather already current for %s on %s", name, today)
+    for m in mountains:
+        if m["latitude"] is None or m["longitude"] is None:
+            log.warning("Skipping %s — no coordinates", m["name"])
             continue
 
-        # Fetch and persist weather
+        cur.execute(
+            f"SELECT id FROM mountain_weather WHERE mountain_id = {ph} AND date = {ph}",
+            (m["id"], today),
+        )
+        if cur.fetchone():
+            log.info("Weather already current for %s on %s", m["name"], today)
+            continue
+
         try:
-            weather = fetch_weather(lat, lon)
+            weather = fetch_weather(m["latitude"], m["longitude"])
         except Exception as exc:
-            log.error("Weather fetch failed for %s: %s", name, exc)
+            log.error("Weather fetch failed for %s: %s", m["name"], exc)
             continue
 
         cur.execute(
@@ -251,7 +139,7 @@ def _run_weather_update() -> None:
             f" (mountain_id, date, temperature_c, weather_code, weather_desc, wind_speed_kmh, fetched_at)"
             f" VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph})",
             (
-                mountain_id,
+                m["id"],
                 today,
                 weather["temperature_c"],
                 weather["weather_code"],
@@ -263,7 +151,7 @@ def _run_weather_update() -> None:
         conn.commit()
         log.info(
             "Stored weather for %s: %.1f°C, %s, %.0f km/h",
-            name,
+            m["name"],
             weather["temperature_c"] or 0,
             weather["weather_desc"],
             weather["wind_speed_kmh"] or 0,

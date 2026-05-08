@@ -141,6 +141,7 @@ if (tourForm) {
             btn.disabled = false;
             btn.textContent = 'Submit';
             loadRecentSuggestions();
+            loadMountainChart();
         });
     });
 }
