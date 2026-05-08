@@ -291,6 +291,9 @@ def trigger_weather_update():
 
 init_db()
 
+from mountain_extraction_service import run_mountain_extraction
+run_mountain_extraction()
+
 # ---------- daily weather scheduler ----------
 # Guard against Flask debug reloader starting a second scheduler process.
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
