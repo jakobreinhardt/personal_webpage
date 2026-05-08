@@ -205,7 +205,7 @@ def list_tours():
 
 @app.route("/api/mountain-mentions", methods=["GET"])
 def get_mountain_mentions():
-    """Return up to 20 mountains sorted by how many user submissions mention them."""
+    """Return up to 10 mountains sorted by how many user submissions mention them."""
     conn = get_db()
     cur = conn.cursor()
     if DATABASE_URL:
@@ -216,7 +216,7 @@ def get_mountain_mentions():
             LEFT JOIN tour_suggestions ts ON ts.text ILIKE '%' || m.name || '%'
             GROUP BY m.name
             ORDER BY mention_count DESC, m.name
-            LIMIT 20
+            LIMIT 10
             """
         )
     else:
@@ -227,7 +227,7 @@ def get_mountain_mentions():
             LEFT JOIN tour_suggestions ts ON LOWER(ts.text) LIKE '%' || LOWER(m.name) || '%'
             GROUP BY m.name
             ORDER BY mention_count DESC, m.name
-            LIMIT 20
+            LIMIT 10
             """
         )
     rows = db_rows_to_dicts(conn, cur)
