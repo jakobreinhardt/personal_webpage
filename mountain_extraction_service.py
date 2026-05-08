@@ -187,7 +187,11 @@ def _run_mountain_extraction() -> None:
     log.info("Processing %d unprocessed tour suggestion(s)", len(unprocessed))
 
     for tour in unprocessed:
-        names = extract_mountains(tour["text"])
+        try:
+            names = extract_mountains(tour["text"])
+        except Exception:
+            log.exception("LLM extraction failed for tour %d, skipping", tour["id"])
+            continue
         log.info("Tour %d → extracted: %s", tour["id"], names)
 
         if not names:
@@ -207,7 +211,7 @@ def _run_mountain_extraction() -> None:
                 f"INSERT INTO tour_mountains (tour_suggestion_id, mountain_id) VALUES ({ph}, {ph})",
                 (tour["id"], mountain_id),
             )
-            conn.commit()
+        conn.commit()
 
     cur.close()
     conn.close()
