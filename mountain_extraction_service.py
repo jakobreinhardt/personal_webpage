@@ -114,35 +114,45 @@ def geocode_mountain(name: str) -> tuple[float, float] | None:
     return float(r["latitude"]), float(r["longitude"])
 
 
-def _find_or_create_mountain(cur, conn, name: str) -> int | None:
-    """Look up a mountain by name, or geocode and insert it. Returns the mountain id."""
+def _find_or_create_mountain(cur, conn, name: str) -> int:
+    """Look up a mountain by name, or insert it (with geocoding if possible).
+
+    Always returns a mountain id — the mountain is inserted even when geocoding
+    fails (with NULL coordinates) so the tour_mountains link is never lost.
+    """
     ph = _ph()
     cur.execute(f"SELECT id FROM mountains WHERE name = {ph}", (name,))
     row = cur.fetchone()
     if row:
         return row[0] if DATABASE_URL else row["id"]
 
-    coords = geocode_mountain(name)
-    if coords is None:
-        return None
-    lat, lon = coords
-    fetched_at = datetime.now(timezone.utc).isoformat()
+    lat, lon, geocoded_at = None, None, None
+    try:
+        coords = geocode_mountain(name)
+        if coords:
+            lat, lon = coords
+            geocoded_at = datetime.now(timezone.utc).isoformat()
+            log.info("Geocoded new mountain %s → %.4f, %.4f", name, lat, lon)
+        else:
+            log.warning("Could not geocode %s — storing without coordinates", name)
+    except Exception:
+        log.exception("Geocoding error for %s — storing without coordinates", name)
+
     if DATABASE_URL:
         cur.execute(
             "INSERT INTO mountains (name, latitude, longitude, geocoded_at)"
             " VALUES (%s, %s, %s, %s) RETURNING id",
-            (name, lat, lon, fetched_at),
+            (name, lat, lon, geocoded_at),
         )
         mountain_id = cur.fetchone()[0]
     else:
         cur.execute(
             "INSERT INTO mountains (name, latitude, longitude, geocoded_at)"
             " VALUES (?, ?, ?, ?)",
-            (name, lat, lon, fetched_at),
+            (name, lat, lon, geocoded_at),
         )
         mountain_id = cur.lastrowid
     conn.commit()
-    log.info("Geocoded new mountain %s → %.4f, %.4f", name, lat, lon)
     return mountain_id
 
 
@@ -205,8 +215,6 @@ def _run_mountain_extraction() -> None:
 
         for name in names:
             mountain_id = _find_or_create_mountain(cur, conn, name)
-            if mountain_id is None:
-                continue
             cur.execute(
                 f"INSERT INTO tour_mountains (tour_suggestion_id, mountain_id) VALUES ({ph}, {ph})",
                 (tour["id"], mountain_id),
