@@ -29,7 +29,7 @@
             <ul class="nav-links" id="nav-links">
                 <li><a href="#introduction">Introduction</a></li>
                 <li><a href="#volunteer-work">Volunteer Work</a></li>
-                <li><a href="#selected-tours">Selected Tours</a></li>
+                <li><a href="#tour-suggestions">Tour Suggestions</a></li>
                 <li><a href="#contact">Contact</a></li>
                 <li class="nav-divider"></li>
                 <li><a href="researcher.html" class="nav-sphere-link">Researcher</a></li>
@@ -128,24 +128,21 @@
         </div>
     </section>
 
-    <!-- Selected Tours Section -->
-    <section class="section" id="selected-tours">
+    <!-- tour suggestions Section -->
+    <section class="section" id="tour-suggestions">
         <div class="container">
-            <h2 class="section-title">Selected Tours</h2>
-            <p class="section-intro">Some of my favorite ski ascends and descends in the Alps.</p>
-            <div class="tour-list">
-                <div class="tour-card">
-                    <div class="tour-content">
-                        <h3>Thaneller North Chute</h3>
-                        <p>A steep and committing north-facing couloir on the Thaneller — demanding route-finding on the ascent and exhilarating skiing on the way down.</p>
-                    </div>
-                </div>
-                <div class="tour-card">
-                    <div class="tour-content">
-                        <h3>Daniel Eastface</h3>
-                        <p>The expansive east face of the Daniel offers a classic ski mountaineering descent with sustained steep terrain and impressive exposure.</p>
-                    </div>
-                </div>
+            <h2 class="section-title">Tour Suggestions</h2>
+
+
+            <div class="tour-suggestion">
+                <h3>Share Your Favorite Tour</h3>
+                <p>Have a great mountain tour to recommend? Leave your suggestion below.</p>
+                <form class="tour-form" id="tour-suggestion-form">
+                    <label for="tour-input" class="sr-only">Your favorite tour</label>
+                    <textarea id="tour-input" name="tour" class="tour-input" placeholder="e.g. Großvenediger from Innergschlöss — amazing glacier descent…" rows="3" maxlength="500" required></textarea>
+                    <button type="submit" class="tour-submit-btn">Submit</button>
+                </form>
+                <div id="recent-suggestions" class="recent-suggestions"></div>
             </div>
 
             <!-- Mountain Popularity Chart -->
@@ -164,16 +161,6 @@
                 </div>
             </div>
 
-            <div class="tour-suggestion">
-                <h3>Share Your Favorite Tour</h3>
-                <p>Have a great ski tour to recommend? Leave your suggestion below.</p>
-                <form class="tour-form" id="tour-suggestion-form">
-                    <label for="tour-input" class="sr-only">Your favorite tour</label>
-                    <textarea id="tour-input" name="tour" class="tour-input" placeholder="e.g. Großvenediger from Innergschlöss — amazing glacier descent…" rows="3" maxlength="500" required></textarea>
-                    <button type="submit" class="tour-submit-btn">Submit</button>
-                </form>
-                <div id="recent-suggestions" class="recent-suggestions"></div>
-            </div>
         </div>
     </section>
 
