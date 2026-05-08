@@ -1,13 +1,14 @@
 """Weather service for mountain tours.
 
-Fetches current weather for all mountains stored in the database and saves
-one weather record per mountain per day using the free Open-Meteo forecast API.
+Fetches current weather for the top 3 most-mentioned mountains and replaces
+all stored weather data. Uses the free Open-Meteo forecast API.
 
 Mountain extraction and geocoding live in mountain_extraction_service.py.
 
 Usage:
     python weather_service.py           # run once immediately
-    called from Render cron job         # runs hourly
+    called from app.py on tour submission
+    called from Render cron job         # runs twice daily (06:00 & 18:00 UTC)
 """
 
 import logging
@@ -86,10 +87,9 @@ def fetch_weather(lat: float, lon: float) -> dict:
 # ---------- main update routine ----------
 
 def run_weather_update() -> None:
-    """Fetch today's weather for every mountain already in the DB.
+    """Fetch current weather for the top 3 most-mentioned mountains.
 
-    Mountains are populated by mountain_extraction_service.py.
-    Skips mountains that already have a record for today.
+    Clears all existing weather data and re-fetches fresh data.
     """
     log.info("Starting weather update")
     try:
@@ -103,29 +103,35 @@ def _run_weather_update() -> None:
     cur = conn.cursor()
     ph = _ph()
 
-    cur.execute("SELECT id, name, latitude, longitude FROM mountains")
+    # Find the top 3 mountains by mention count
+    cur.execute(
+        """
+        SELECT m.id, m.name, m.latitude, m.longitude
+        FROM mountains m
+        JOIN tour_mountains tm ON tm.mountain_id = m.id
+        GROUP BY m.id, m.name, m.latitude, m.longitude
+        ORDER BY COUNT(tm.id) DESC, m.name
+        LIMIT 3
+        """
+    )
     rows = cur.fetchall()
     if DATABASE_URL:
-        mountains = [{"id": r[0], "name": r[1], "latitude": r[2], "longitude": r[3]} for r in rows]
+        top_mountains = [{"id": r[0], "name": r[1], "latitude": r[2], "longitude": r[3]} for r in rows]
     else:
-        mountains = [dict(r) for r in rows]
+        top_mountains = [dict(r) for r in rows]
 
-    log.info("Mountains to update weather for: %s", [m["name"] for m in mountains])
+    log.info("Top 3 mountains for weather: %s", [m["name"] for m in top_mountains])
+
+    # Clear all existing weather data and re-fetch
+    cur.execute("DELETE FROM mountain_weather")
+    conn.commit()
 
     today = date.today().isoformat()
     fetched_at = datetime.now(timezone.utc).isoformat()
 
-    for m in mountains:
+    for m in top_mountains:
         if m["latitude"] is None or m["longitude"] is None:
             log.warning("Skipping %s — no coordinates", m["name"])
-            continue
-
-        cur.execute(
-            f"SELECT id FROM mountain_weather WHERE mountain_id = {ph} AND date = {ph}",
-            (m["id"], today),
-        )
-        if cur.fetchone():
-            log.info("Weather already current for %s on %s", m["name"], today)
             continue
 
         try:

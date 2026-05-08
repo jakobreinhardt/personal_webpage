@@ -202,7 +202,9 @@ def add_tour():
     conn.close()
 
     from mountain_extraction_service import run_mountain_extraction
+    from weather_service import run_weather_update
     run_mountain_extraction()
+    run_weather_update()
 
     return jsonify({"status": "ok", "created_at": created_at}), 201
 
@@ -247,7 +249,7 @@ def get_mountain_mentions():
 
 @app.route("/api/mountain-weather", methods=["GET"])
 def get_mountain_weather():
-    """Return weather for the top 3 mountains by extraction count."""
+    """Return weather for the top 3 mountains (already the only data stored)."""
     conn = get_db()
     cur = conn.cursor()
     cur.execute(
@@ -256,18 +258,6 @@ def get_mountain_weather():
                mw.weather_desc, mw.wind_speed_kmh, mw.fetched_at
         FROM mountains m
         JOIN mountain_weather mw ON mw.mountain_id = m.id
-        WHERE mw.date = (
-            SELECT MAX(mw2.date) FROM mountain_weather mw2
-            WHERE mw2.mountain_id = m.id
-        )
-        AND m.id IN (
-            SELECT m2.id
-            FROM mountains m2
-            LEFT JOIN tour_mountains tm ON tm.mountain_id = m2.id
-            GROUP BY m2.id, m2.name
-            ORDER BY COUNT(tm.id) DESC, m2.name
-            LIMIT 3
-        )
         ORDER BY m.name
         """
     )
@@ -299,7 +289,7 @@ run_mountain_extraction()
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     from weather_service import run_weather_update as _run_weather_update
     _scheduler = BackgroundScheduler()
-    _scheduler.add_job(_run_weather_update, "cron", hour=6, minute=0)
+    _scheduler.add_job(_run_weather_update, "cron", hour="6,18", minute=0)
     _scheduler.start()
     atexit.register(lambda: _scheduler.shutdown(wait=False))
 

@@ -142,6 +142,7 @@ if (tourForm) {
             btn.textContent = 'Submit';
             loadRecentSuggestions();
             loadMountainChart();
+            loadMountainWeather();
         });
     });
 }
@@ -198,6 +199,12 @@ function loadMountainWeather() {
                 const wind = m.wind_speed_kmh != null ? Math.round(m.wind_speed_kmh) + ' km/h' : '–';
                 const name = m.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 const desc = (m.weather_desc || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                let updated = '';
+                if (m.fetched_at) {
+                    const d = new Date(m.fetched_at);
+                    updated = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+                        + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+                }
                 return `<div class="weather-card">
                     <div class="weather-icon">${icon}</div>
                     <div class="weather-info">
@@ -205,6 +212,7 @@ function loadMountainWeather() {
                         <div class="weather-temp">${temp}</div>
                         <div class="weather-desc">${desc}</div>
                         <div class="weather-wind">💨 ${wind}</div>
+                        ${updated ? `<div class="weather-updated">Updated: ${updated}</div>` : ''}
                     </div>
                 </div>`;
             }).join('');
