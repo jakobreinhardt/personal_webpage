@@ -69,7 +69,7 @@ def extract_mountains(text: str) -> list[str]:
         model="claude-haiku-4-5",
         max_tokens=300,
         system=(
-            "You extract mountain and peak names from ski tour descriptions. "
+            "You extract mountain and peak names from tour descriptions. "
             'Return ONLY a JSON array of unique mountain names, e.g. ["Zugspitze","Thaneller"]. '
             "Include only actual mountain or peak names — not valleys, passes, huts, or villages. "
             "If no mountains are found, return []."
