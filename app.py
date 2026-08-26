@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sqlite3
@@ -7,7 +8,7 @@ import anthropic
 from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, Response, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 load_dotenv()
@@ -196,11 +197,20 @@ def list_tours():
 
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    """Relay a visitor chat message to Claude and return the reply.
+    """Stream a Claude reply for a visitor chat message as Server-Sent Events.
 
     Expects JSON body: { "messages": [ {"role": "user"|"assistant", "content": str}, ... ] }
     The browser keeps the conversation and resends it each turn; the history is
     re-validated and trimmed server-side before it reaches the model.
+
+    Responds with text/event-stream, one JSON object per event:
+      {"delta": "..."}  a chunk of reply text
+      {"done": true}    generation finished
+      {"error": "..."}  something went wrong mid-stream
+
+    Validation and rate-limit failures are returned as ordinary JSON with a 4xx
+    status instead, since the status code can no longer change once streaming
+    has started.
 
     The API key stays on the server — the browser never sees it.
     """
@@ -224,19 +234,27 @@ def chat():
     if not messages:
         return jsonify({"error": "a message is required"}), 400
 
-    try:
-        reply = chat_service.answer(messages)
-    except anthropic.RateLimitError:
-        log.warning("Anthropic rate limit hit on chat")
-        return jsonify({"error": "The chat is busy right now — please try again shortly."}), 503
-    except anthropic.APIStatusError as exc:
-        log.error("Anthropic API error on chat: %s", exc)
-        return jsonify({"error": "The chat is unavailable right now."}), 503
-    except anthropic.APIConnectionError:
-        log.error("Could not reach the Anthropic API")
-        return jsonify({"error": "The chat is unavailable right now."}), 503
+    def event_stream():
+        try:
+            for chunk in chat_service.answer_stream(messages):
+                yield f"data: {json.dumps({'delta': chunk})}\n\n"
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except anthropic.RateLimitError:
+            log.warning("Anthropic rate limit hit on chat")
+            yield f"data: {json.dumps({'error': 'The chat is busy right now — please try again shortly.'})}\n\n"
+        except (anthropic.APIStatusError, anthropic.APIConnectionError) as exc:
+            log.error("Anthropic API error on chat: %s", exc)
+            yield f"data: {json.dumps({'error': 'The chat is unavailable right now.'})}\n\n"
 
-    return jsonify({"reply": reply})
+    return Response(
+        event_stream(),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            # Stop nginx-style proxies from buffering the stream into one blob.
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @app.route("/api/mountain-mentions", methods=["GET"])

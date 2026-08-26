@@ -24,7 +24,7 @@ A lightweight Flask API:
 - `POST /api/tours` — submit a tour suggestion (stored in PostgreSQL)
 - `GET /api/tours` — retrieve all suggestions (newest first)
 - `GET /api/mountain-mentions` — top 10 mountains by how often they appear in suggestions
-- `POST /api/chat` — relay a visitor chat message to Claude (`chat_service.py`)
+- `POST /api/chat` — stream a Claude reply for a visitor chat message, as Server-Sent Events (`chat_service.py`)
 
 CORS is configured to allow requests from `https://jakobreinhardt.eu`.
 
@@ -33,6 +33,12 @@ CORS is configured to allow requests from `https://jakobreinhardt.eu`.
 The activities page has a chat widget backed by Claude. The browser holds the
 conversation and resends it each turn; the server re-validates it and calls the
 Anthropic API so the key never reaches the client.
+
+The reply is streamed back as Server-Sent Events (`{"delta": "..."}` per chunk,
+then `{"done": true}`) and rendered live under the input box, so the first words
+appear within a second or two. Validation and rate-limit failures are returned as
+ordinary JSON with a 4xx status instead, since the status code can no longer
+change once streaming has begun.
 
 Because the endpoint is public and billed to a personal API key, spend is capped
 in `chat_service.py`:

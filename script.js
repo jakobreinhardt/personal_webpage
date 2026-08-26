@@ -223,67 +223,46 @@ loadMountainChart();
 (function () {
     const form = document.getElementById('chat-form');
     const input = document.getElementById('chat-input');
-    const logEl = document.getElementById('chat-log');
     const sendBtn = document.getElementById('chat-send');
-    const note = document.getElementById('chat-note');
-    if (!form || !input || !logEl || !sendBtn) return;
-
-    const GREETING = 'Hi! Ask me anything about ski touring, mountain safety, or gear.';
-    const noteDefault = note ? note.textContent : '';
+    const answerEl = document.getElementById('chat-answer');
+    const historyEl = document.getElementById('chat-history');
+    if (!form || !input || !sendBtn || !answerEl || !historyEl) return;
 
     // The API is stateless, so the browser keeps the conversation and resends it
     // each turn. The server re-validates and trims it before calling the model.
     const history = [];
     let busy = false;
 
-    function escapeHtml(s) {
-        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    // Render on the free Render tier sleeps when idle; the first request after
+    // that can take the best part of a minute to wake it. Say so rather than
+    // leaving the visitor looking at an empty box.
+    const WAKE_HINT_MS = 8000;
+
+    function el(tag, className, text) {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
     }
 
-    function addMessage(role, text) {
-        const wrap = document.createElement('div');
-        wrap.className = 'chat-msg chat-msg-' + role;
-        const bubble = document.createElement('div');
-        bubble.className = 'chat-bubble';
-        // Keep the model's paragraph breaks without trusting its markup.
-        bubble.innerHTML = escapeHtml(text).replace(/\n/g, '<br>');
-        wrap.appendChild(bubble);
-        logEl.appendChild(wrap);
-        logEl.scrollTop = logEl.scrollHeight;
-        return wrap;
-    }
+    // Move the exchange that is currently on screen into the history list, so
+    // the newest answer always sits directly under the input.
+    function archiveCurrent() {
+        const q = answerEl.querySelector('.chat-answer-q');
+        const a = answerEl.querySelector('.chat-answer-text');
+        if (!q || !a || !a.textContent.trim()) return;
 
-    function addTypingIndicator() {
-        const wrap = document.createElement('div');
-        wrap.className = 'chat-msg chat-msg-assistant';
-        wrap.innerHTML = '<div class="chat-bubble chat-typing">' +
-            '<span></span><span></span><span></span></div>';
-        logEl.appendChild(wrap);
-        logEl.scrollTop = logEl.scrollHeight;
-        return wrap;
+        const turn = el('div', 'chat-turn');
+        turn.appendChild(el('div', 'chat-turn-q', q.textContent));
+        turn.appendChild(el('div', 'chat-turn-a', a.textContent));
+        historyEl.prepend(turn);
     }
 
     function setBusy(state) {
         busy = state;
         sendBtn.disabled = state;
-        input.disabled = state;
-        sendBtn.textContent = state ? '…' : 'Send';
+        sendBtn.textContent = state ? 'Thinking…' : 'Send';
     }
-
-    function autoGrow() {
-        input.style.height = 'auto';
-        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-    }
-
-    input.addEventListener('input', autoGrow);
-
-    // Enter sends, Shift+Enter starts a new line.
-    input.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            form.requestSubmit();
-        }
-    });
 
     form.addEventListener('submit', e => {
         e.preventDefault();
@@ -292,43 +271,110 @@ loadMountainChart();
         const text = input.value.trim();
         if (!text) return;
 
-        addMessage('user', text);
+        archiveCurrent();
+
+        answerEl.hidden = false;
+        answerEl.classList.remove('chat-answer-error');
+        answerEl.innerHTML = '';
+        answerEl.appendChild(el('div', 'chat-answer-q', text));
+        const out = el('div', 'chat-answer-text');
+        answerEl.appendChild(out);
+        const status = el('div', 'chat-status', 'Thinking…');
+        answerEl.appendChild(status);
+
         history.push({ role: 'user', content: text });
         input.value = '';
-        autoGrow();
         setBusy(true);
-        if (note) note.textContent = noteDefault;
 
-        const typing = addTypingIndicator();
+        let firstChunk = true;
+        const wakeHint = setTimeout(() => {
+            if (firstChunk) status.textContent = 'Waking up the server — this can take up to a minute…';
+        }, WAKE_HINT_MS);
+
+        function fail(message) {
+            clearTimeout(wakeHint);
+            status.remove();
+            answerEl.classList.add('chat-answer-error');
+            out.textContent = message;
+            history.pop();   // drop the unanswered turn
+            setBusy(false);
+        }
 
         fetch(API_BASE + '/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ messages: history })
         })
-            .then(res => res.json().then(body => ({ ok: res.ok, body })))
-            .then(({ ok, body }) => {
-                typing.remove();
-                if (!ok || !body.reply) {
-                    // Drop the unanswered turn so the next request isn't two
-                    // user messages in a row.
-                    history.pop();
-                    addMessage('error', body.error || 'Something went wrong. Please try again.');
-                    return;
+            .then(res => {
+                if (!res.ok) {
+                    // Validation and rate-limit failures come back as plain JSON.
+                    return res.json()
+                        .catch(() => ({}))
+                        .then(body => { fail(body.error || `Something went wrong (HTTP ${res.status}).`); });
                 }
-                addMessage('assistant', body.reply);
-                history.push({ role: 'assistant', content: body.reply });
+
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+
+                function pump() {
+                    return reader.read().then(({ done, value }) => {
+                        if (done) {
+                            clearTimeout(wakeHint);
+                            status.remove();
+                            setBusy(false);
+                            return;
+                        }
+
+                        buffer += decoder.decode(value, { stream: true });
+
+                        // SSE frames are separated by a blank line.
+                        const frames = buffer.split('\n\n');
+                        buffer = frames.pop();
+
+                        for (const frame of frames) {
+                            const line = frame.split('\n').find(l => l.startsWith('data: '));
+                            if (!line) continue;
+
+                            let payload;
+                            try {
+                                payload = JSON.parse(line.slice(6));
+                            } catch (err) {
+                                continue;
+                            }
+
+                            if (payload.error) { fail(payload.error); return; }
+
+                            if (payload.delta) {
+                                if (firstChunk) {
+                                    firstChunk = false;
+                                    clearTimeout(wakeHint);
+                                    status.remove();
+                                }
+                                // textContent, so nothing the model returns is
+                                // ever treated as markup.
+                                out.textContent += payload.delta;
+                            }
+
+                            if (payload.done) {
+                                history.push({ role: 'assistant', content: out.textContent });
+                            }
+                        }
+
+                        return pump();
+                    });
+                }
+
+                return pump();
             })
-            .catch(() => {
-                typing.remove();
-                history.pop();
-                addMessage('error', 'Could not reach the server. Please try again later.');
-            })
-            .finally(() => {
-                setBusy(false);
-                input.focus();
-            });
+            .catch(() => fail('Could not reach the server. Please try again in a moment.'));
     });
 
-    addMessage('assistant', GREETING);
+    // Enter sends, Shift+Enter starts a new line.
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            form.requestSubmit();
+        }
+    });
 })();

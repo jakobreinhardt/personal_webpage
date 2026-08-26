@@ -159,15 +159,23 @@
                 <p class="chat-intro">Questions about ski touring, gear, or staying safe in the Alps? Have a chat.</p>
 
                 <div class="chat-window">
-                    <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Chat conversation"></div>
-
                     <form class="chat-form" id="chat-form">
                         <label for="chat-input" class="sr-only">Your message</label>
-                        <textarea id="chat-input" class="chat-input" rows="1" maxlength="1000"
-                            placeholder="e.g. What should I pack for a spring ski tour?" required></textarea>
-                        <button type="submit" class="chat-send-btn" id="chat-send" aria-label="Send message">Send</button>
+                        <textarea id="chat-input" class="chat-input" rows="4" maxlength="1000"
+                            placeholder="e.g. What should I pack for a spring ski tour in the Stubai Alps?" required></textarea>
+                        <div class="chat-form-row">
+                            <span class="chat-hint">Enter to send · Shift + Enter for a new line</span>
+                            <button type="submit" class="chat-send-btn" id="chat-send">Send</button>
+                        </div>
                     </form>
-                    <p class="chat-note" id="chat-note">Powered by Claude. Not a substitute for a current avalanche bulletin.</p>
+
+                    <!-- the live reply streams in here, directly under the input -->
+                    <div class="chat-answer" id="chat-answer" role="log" aria-live="polite" aria-label="Assistant reply" hidden></div>
+
+                    <!-- earlier exchanges, newest first -->
+                    <div class="chat-history" id="chat-history"></div>
+
+                    <p class="chat-note">Powered by Claude. Not a substitute for a current avalanche bulletin.</p>
                 </div>
             </div>
 

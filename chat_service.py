@@ -121,13 +121,22 @@ def sanitize_history(raw) -> list[dict]:
     return cleaned
 
 
-def answer(messages: list[dict]) -> str:
-    """Send the conversation to Claude and return the reply text."""
+REFUSAL_REPLY = "Sorry — I can't help with that one. Ask me something about the mountains instead."
+EMPTY_REPLY = "Sorry — I didn't manage to put together an answer. Could you rephrase?"
+
+
+def answer_stream(messages: list[dict]):
+    """Stream Claude's reply, yielding text chunks as they are generated.
+
+    Streaming is what makes the widget feel alive: the first words appear in a
+    second or two instead of the visitor staring at a blank box for the whole
+    generation. Raises on API errors so the caller can decide what to show.
+    """
     import anthropic
 
     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
-    resp = client.messages.create(
+    with client.messages.stream(
         model=MODEL,
         max_tokens=MAX_OUTPUT_TOKENS,
         system=SYSTEM_PROMPT,
@@ -136,23 +145,28 @@ def answer(messages: list[dict]) -> str:
         thinking={"type": "adaptive"},
         output_config={"effort": "low"},
         messages=messages,
-    )
+    ) as stream:
+        got_text = False
+        # text_stream yields only visible text — thinking blocks are skipped.
+        for chunk in stream.text_stream:
+            if chunk:
+                got_text = True
+                yield chunk
 
-    if resp.stop_reason == "refusal":
-        log.info("Chat refusal: %s", getattr(resp.stop_details, "category", None))
-        return "Sorry — I can't help with that one. Ask me something about the mountains instead."
+        final = stream.get_final_message()
 
-    # content holds thinking blocks as well as text, so filter by type rather
-    # than reading content[0].
-    text = "".join(b.text for b in resp.content if b.type == "text").strip()
+    if final.stop_reason == "refusal":
+        log.info("Chat refusal: %s", getattr(final.stop_details, "category", None))
+        if not got_text:
+            yield REFUSAL_REPLY
+        return
 
     log.info(
         "Chat reply: %d in / %d out tokens, stop_reason=%s",
-        resp.usage.input_tokens,
-        resp.usage.output_tokens,
-        resp.stop_reason,
+        final.usage.input_tokens,
+        final.usage.output_tokens,
+        final.stop_reason,
     )
 
-    if not text:
-        return "Sorry — I didn't manage to put together an answer. Could you rephrase?"
-    return text
+    if not got_text:
+        yield EMPTY_REPLY
