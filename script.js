@@ -217,3 +217,118 @@ function loadMountainChart() {
 }
 
 loadMountainChart();
+
+// ---------- Mountain chat ----------
+
+(function () {
+    const form = document.getElementById('chat-form');
+    const input = document.getElementById('chat-input');
+    const logEl = document.getElementById('chat-log');
+    const sendBtn = document.getElementById('chat-send');
+    const note = document.getElementById('chat-note');
+    if (!form || !input || !logEl || !sendBtn) return;
+
+    const GREETING = 'Hi! Ask me anything about ski touring, mountain safety, or gear.';
+    const noteDefault = note ? note.textContent : '';
+
+    // The API is stateless, so the browser keeps the conversation and resends it
+    // each turn. The server re-validates and trims it before calling the model.
+    const history = [];
+    let busy = false;
+
+    function escapeHtml(s) {
+        return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function addMessage(role, text) {
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-msg chat-msg-' + role;
+        const bubble = document.createElement('div');
+        bubble.className = 'chat-bubble';
+        // Keep the model's paragraph breaks without trusting its markup.
+        bubble.innerHTML = escapeHtml(text).replace(/\n/g, '<br>');
+        wrap.appendChild(bubble);
+        logEl.appendChild(wrap);
+        logEl.scrollTop = logEl.scrollHeight;
+        return wrap;
+    }
+
+    function addTypingIndicator() {
+        const wrap = document.createElement('div');
+        wrap.className = 'chat-msg chat-msg-assistant';
+        wrap.innerHTML = '<div class="chat-bubble chat-typing">' +
+            '<span></span><span></span><span></span></div>';
+        logEl.appendChild(wrap);
+        logEl.scrollTop = logEl.scrollHeight;
+        return wrap;
+    }
+
+    function setBusy(state) {
+        busy = state;
+        sendBtn.disabled = state;
+        input.disabled = state;
+        sendBtn.textContent = state ? '…' : 'Send';
+    }
+
+    function autoGrow() {
+        input.style.height = 'auto';
+        input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+    }
+
+    input.addEventListener('input', autoGrow);
+
+    // Enter sends, Shift+Enter starts a new line.
+    input.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            form.requestSubmit();
+        }
+    });
+
+    form.addEventListener('submit', e => {
+        e.preventDefault();
+        if (busy) return;
+
+        const text = input.value.trim();
+        if (!text) return;
+
+        addMessage('user', text);
+        history.push({ role: 'user', content: text });
+        input.value = '';
+        autoGrow();
+        setBusy(true);
+        if (note) note.textContent = noteDefault;
+
+        const typing = addTypingIndicator();
+
+        fetch(API_BASE + '/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ messages: history })
+        })
+            .then(res => res.json().then(body => ({ ok: res.ok, body })))
+            .then(({ ok, body }) => {
+                typing.remove();
+                if (!ok || !body.reply) {
+                    // Drop the unanswered turn so the next request isn't two
+                    // user messages in a row.
+                    history.pop();
+                    addMessage('error', body.error || 'Something went wrong. Please try again.');
+                    return;
+                }
+                addMessage('assistant', body.reply);
+                history.push({ role: 'assistant', content: body.reply });
+            })
+            .catch(() => {
+                typing.remove();
+                history.pop();
+                addMessage('error', 'Could not reach the server. Please try again later.');
+            })
+            .finally(() => {
+                setBusy(false);
+                input.focus();
+            });
+    });
+
+    addMessage('assistant', GREETING);
+})();

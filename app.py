@@ -1,7 +1,9 @@
+import logging
 import os
 import sqlite3
 from datetime import datetime, timezone
 
+import anthropic
 from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
@@ -17,6 +19,8 @@ ALLOWED_ORIGINS = os.environ.get(
     "ALLOWED_ORIGINS", "https://jakobreinhardt.eu"
 ).split(",")
 CORS(app, resources={r"/api/*": {"origins": ALLOWED_ORIGINS}})
+
+log = logging.getLogger(__name__)
 
 DATABASE_URL = os.environ.get("DATABASE_URL")  # set via env var on Render — never commit credentials
 
@@ -188,6 +192,51 @@ def list_tours():
     cur.close()
     conn.close()
     return jsonify(rows)
+
+
+@app.route("/api/chat", methods=["POST"])
+def chat():
+    """Relay a visitor chat message to Claude and return the reply.
+
+    Expects JSON body: { "messages": [ {"role": "user"|"assistant", "content": str}, ... ] }
+    The browser keeps the conversation and resends it each turn; the history is
+    re-validated and trimmed server-side before it reaches the model.
+
+    The API key stays on the server — the browser never sees it.
+    """
+    import chat_service
+
+    if not chat_service.ANTHROPIC_API_KEY:
+        log.error("ANTHROPIC_API_KEY not set — chat endpoint unavailable")
+        return jsonify({"error": "Chat is not configured right now."}), 503
+
+    # Render sits behind a proxy, so the real client IP is the first entry of
+    # X-Forwarded-For. Spoofable, which is why the daily total cap exists too.
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    ip = forwarded.split(",")[0].strip() or request.remote_addr or "unknown"
+
+    allowed, reason = chat_service.check_rate_limit(ip)
+    if not allowed:
+        return jsonify({"error": reason}), 429
+
+    data = request.get_json(silent=True) or {}
+    messages = chat_service.sanitize_history(data.get("messages"))
+    if not messages:
+        return jsonify({"error": "a message is required"}), 400
+
+    try:
+        reply = chat_service.answer(messages)
+    except anthropic.RateLimitError:
+        log.warning("Anthropic rate limit hit on chat")
+        return jsonify({"error": "The chat is busy right now — please try again shortly."}), 503
+    except anthropic.APIStatusError as exc:
+        log.error("Anthropic API error on chat: %s", exc)
+        return jsonify({"error": "The chat is unavailable right now."}), 503
+    except anthropic.APIConnectionError:
+        log.error("Could not reach the Anthropic API")
+        return jsonify({"error": "The chat is unavailable right now."}), 503
+
+    return jsonify({"reply": reply})
 
 
 @app.route("/api/mountain-mentions", methods=["GET"])

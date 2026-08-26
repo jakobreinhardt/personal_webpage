@@ -19,12 +19,37 @@ A personal website hosted on GitHub Pages with a Flask backend for dynamic featu
 
 ## Backend (`app.py`)
 
-A lightweight Flask API with one resource:
+A lightweight Flask API:
 
 - `POST /api/tours` — submit a tour suggestion (stored in PostgreSQL)
 - `GET /api/tours` — retrieve all suggestions (newest first)
+- `GET /api/mountain-mentions` — top 10 mountains by how often they appear in suggestions
+- `POST /api/chat` — relay a visitor chat message to Claude (`chat_service.py`)
 
 CORS is configured to allow requests from `https://jakobreinhardt.eu`.
+
+### Chat (`chat_service.py`)
+
+The activities page has a chat widget backed by Claude. The browser holds the
+conversation and resends it each turn; the server re-validates it and calls the
+Anthropic API so the key never reaches the client.
+
+Because the endpoint is public and billed to a personal API key, spend is capped
+in `chat_service.py`:
+
+| Limit | Value |
+|-------|-------|
+| Model | `claude-opus-5` |
+| Max output tokens per reply | 2000 |
+| Max characters per message | 1000 |
+| History sent to the model | last 12 messages |
+| Requests per IP per hour | 15 |
+| Requests per day (all visitors) | 300 |
+
+The rate-limit counters live in process memory, so they reset on restart and are
+tracked per gunicorn worker. That is a spend brake, not an exact quota — move
+them into PostgreSQL if the site ever runs more than one worker or needs the
+limit enforced strictly.
 
 ## Environment Variables (Render)
 
@@ -32,6 +57,7 @@ CORS is configured to allow requests from `https://jakobreinhardt.eu`.
 |----------|-------------|
 | `DATABASE_URL` | Neon PostgreSQL connection string |
 | `ALLOWED_ORIGINS` | Comma-separated allowed origins (defaults to `https://jakobreinhardt.eu`) |
+| `ANTHROPIC_API_KEY` | Anthropic API key — used by mountain extraction and the chat endpoint |
 
 ## Local Development
 

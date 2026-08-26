@@ -3,5 +3,5 @@ flask-cors
 gunicorn
 psycopg2-binary
 python-dotenv
-anthropic
+anthropic>=1.0.0
 requests
