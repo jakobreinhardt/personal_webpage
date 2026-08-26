@@ -142,7 +142,6 @@ if (tourForm) {
             btn.textContent = 'Submit';
             loadRecentSuggestions();
             loadMountainChart();
-            loadMountainWeather();
         });
     });
 }
@@ -169,62 +168,6 @@ function loadRecentSuggestions() {
 
 loadRecentSuggestions();
 
-// ---------- Mountain weather ----------
-
-const WMO_ICONS = {
-    0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
-    45: '🌫️', 48: '🌫️',
-    51: '🌦️', 53: '🌦️', 55: '🌧️',
-    61: '🌦️', 63: '🌧️', 65: '🌧️',
-    71: '🌨️', 73: '❄️', 75: '❄️', 77: '🌨️',
-    80: '🌦️', 81: '🌧️', 82: '⛈️',
-    85: '🌨️', 86: '❄️',
-    95: '⛈️', 96: '⛈️', 99: '⛈️',
-};
-
-function loadMountainWeather() {
-    const grid = document.getElementById('weather-grid');
-    if (!grid) return;
-
-    fetch(API_BASE + '/api/mountain-weather')
-        .then(res => res.ok ? res.json() : [])
-        .then(data => {
-            if (!data.length) {
-                grid.innerHTML = '<p class="weather-loading">No conditions available yet.</p>';
-                return;
-            }
-            grid.innerHTML = data.map(m => {
-                const icon = WMO_ICONS[m.weather_code] || '🏔️';
-                const temp = m.temperature_c != null ? m.temperature_c.toFixed(1) + '°C' : '–';
-                const wind = m.wind_speed_kmh != null ? Math.round(m.wind_speed_kmh) + ' km/h' : '–';
-                const name = m.name.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                const desc = (m.weather_desc || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                let updated = '';
-                if (m.fetched_at) {
-                    const d = new Date(m.fetched_at);
-                    updated = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-                        + ', ' + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-                }
-                return `<div class="weather-card">
-                    <div class="weather-icon">${icon}</div>
-                    <div class="weather-info">
-                        <div class="weather-mountain">${name}</div>
-                        <div class="weather-temp">${temp}</div>
-                        <div class="weather-desc">${desc}</div>
-                        <div class="weather-wind">💨 ${wind}</div>
-                        ${updated ? `<div class="weather-updated">Updated: ${updated}</div>` : ''}
-                    </div>
-                </div>`;
-            }).join('');
-        })
-        .catch(() => {
-            const g = document.getElementById('weather-grid');
-            if (g) g.innerHTML = '<p class="weather-loading">Conditions unavailable.</p>';
-        });
-}
-
-loadMountainWeather();
-
 // ---------- Mountain mentions bar chart ----------
 
 function loadMountainChart() {
@@ -235,7 +178,7 @@ function loadMountainChart() {
         .then(res => res.ok ? res.json() : [])
         .then(data => {
             if (!data.length) {
-                container.innerHTML = '<p class="weather-loading">No data available yet.</p>';
+                container.innerHTML = '<p class="chart-loading">No data available yet.</p>';
                 return;
             }
 
@@ -269,7 +212,7 @@ function loadMountainChart() {
                 xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mountain mentions bar chart">${bars}</svg>`;
         })
         .catch(() => {
-            container.innerHTML = '<p class="weather-loading">Chart unavailable.</p>';
+            container.innerHTML = '<p class="chart-loading">Chart unavailable.</p>';
         });
 }
 

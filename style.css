@@ -1272,15 +1272,10 @@ img {
     border: 0;
 }
 
-/* ===== Mountain Weather Conditions ===== */
-.mountain-weather {
-    margin-top: 32px;
-    margin-bottom: 32px;
-}
-
+/* ===== Mountain Popularity Chart ===== */
 .mountain-chart-section {
     margin-top: 32px;
-    margin-bottom: 0;
+    margin-bottom: 32px;
 }
 
 .mountain-chart-container {
@@ -1309,81 +1304,14 @@ img {
     fill: var(--color-activities);
 }
 
-.mountain-weather-title {
+.mountain-chart-title {
     font-size: 1rem;
     font-weight: 600;
     color: var(--color-text-heading);
     margin-bottom: 16px;
 }
 
-.weather-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 12px;
-}
-
-.weather-card {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    transition: border-color var(--transition), transform var(--transition);
-}
-
-.weather-card:hover {
-    border-color: var(--color-activities);
-    transform: translateY(-2px);
-}
-
-.weather-icon {
-    font-size: 1.6rem;
-    flex-shrink: 0;
-    line-height: 1;
-}
-
-.weather-info {
-    min-width: 0;
-}
-
-.weather-mountain {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--color-text-heading);
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.weather-temp {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-activities);
-    margin-bottom: 2px;
-}
-
-.weather-desc {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    margin-bottom: 2px;
-}
-
-.weather-wind {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-}
-
-.weather-updated {
-    font-size: 0.65rem;
-    color: var(--color-text-muted);
-    opacity: 0.7;
-    margin-top: 0.25rem;
-}
-
-.weather-loading {
+.chart-loading {
     font-size: 0.85rem;
     color: var(--color-text-muted);
 }
