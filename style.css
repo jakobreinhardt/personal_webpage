@@ -249,6 +249,16 @@ img {
     z-index: 1;
 }
 
+.entry-portrait {
+    width: 168px;
+    height: 168px;
+    margin: 0 auto 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--color-bg);
+    box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.5), 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
 .entry-greeting {
     font-size: 1.1rem;
     color: var(--color-primary);
@@ -433,6 +443,42 @@ img {
     color: var(--color-text-muted);
     max-width: 650px;
     line-height: 1.8;
+}
+
+/* Wide photo below the hero text — one per sphere page */
+.sub-hero-photo {
+    position: relative; /* paint above the .sub-hero::before tint */
+    margin-top: 40px;
+}
+
+.sub-hero-photo img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--color-border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.sub-hero-photo figcaption {
+    margin-top: 14px;
+    padding-left: 12px;
+    border-left: 2px solid var(--color-border);
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+.subpage-researcher .sub-hero-photo figcaption { border-left-color: var(--color-researcher); }
+.subpage-investor .sub-hero-photo figcaption { border-left-color: var(--color-investor); }
+.subpage-activities .sub-hero-photo figcaption { border-left-color: var(--color-activities); }
+
+@media (max-width: 600px) {
+    /* Wide shots get too small on phones; crop towards the subject instead. */
+    .sub-hero-photo img {
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        object-position: var(--photo-focus, 35% 50%);
+    }
 }
 
 /* ===== Buttons ===== */
@@ -1589,6 +1635,12 @@ img {
         font-size: 2.4rem;
     }
 
+    .entry-portrait {
+        width: 136px;
+        height: 136px;
+        margin-bottom: 22px;
+    }
+
     .entry-suffix {
         font-size: 1.4rem;
     }
@@ -1771,6 +1823,11 @@ body.clean-theme .entry-hero::before {
     background: radial-gradient(circle, rgba(26, 26, 46, 0.03) 0%, transparent 60%);
 }
 
+body.clean-theme .entry-portrait {
+    border: none;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+
 body.clean-theme .entry-greeting {
     color: #6c757d;
     font-weight: 400;
@@ -1934,6 +1991,17 @@ body.clean-theme .sub-hero h1 {
 
 body.clean-theme .sub-hero p {
     color: #888;
+    font-weight: 300;
+}
+
+body.clean-theme .sub-hero-photo img {
+    border: none;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+}
+
+body.clean-theme .sub-hero-photo figcaption {
+    border-left-color: #1a1a2e;
+    color: #999;
     font-weight: 300;
 }
 
